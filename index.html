@@ -3,859 +3,766 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Whimgo — Sovereign Local-First AI</title>
-  <meta name="description" content="An open-source framework for building sovereign, local-first AI systems that run on your hardware — from your desktop to your dashboard.">
-  <link rel="icon" type="image/png" href="assets/Whim.png">
+  <title>Whim — Local-First AI Terminal for Desktop, Mobile & Vehicle</title>
+  <meta name="description" content="Whim is an open-source desktop and mobile ecosystem that unifies voice AI, local LLM chat, weather radar, APRS radio, geofencing, IoT control, and vehicle integration into a single sovereign application. No cloud. No subscriptions. Your hardware, your models.">
+  <link rel="icon" type="image/png" href="assets/fire.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #1a1a1a;
+      --bg: #0e0e0e;
+      --bg-card: #1a1a1a;
+      --bg-elevated: #222222;
       --bg-surface: #2b2b2b;
-      --bg-elevated: #333333;
       --accent: #00ff00;
-      --accent-dim: #00cc00;
-      --accent-glow: rgba(0, 255, 0, 0.15);
-      --text: #dce4ee;
-      --text-muted: #8a93a8;
-      --orange: #ff8c00;
-      --orange-dim: #cc7000;
-      --border: #3a3a3a;
-      --red: #ff4444;
+      --accent-dim: #2fa572;
+      --accent-glow: rgba(0, 255, 0, 0.12);
+      --orange: #e08030;
+      --orange-glow: rgba(224, 128, 48, 0.12);
       --cyan: #00e5ff;
-      --font-mono: 'Courier New', 'Consolas', monospace;
-      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --blue: #1e6ea1;
+      --red: #d94040;
+      --yellow: #e0a030;
+      --text: #dce4ee;
+      --text-dim: #888888;
+      --text-muted: #555555;
+      --border: #2a2a2a;
+      --border-hi: #3a3a3a;
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+      --sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     html { scroll-behavior: smooth; }
-
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: var(--font-sans);
-      line-height: 1.6;
+      font-family: var(--sans);
+      line-height: 1.7;
+      font-size: 15px;
       overflow-x: hidden;
     }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ::selection { background: var(--blue); color: #fff; }
+    img { max-width: 100%; display: block; }
 
     /* NAV */
     nav {
-      position: fixed;
-      top: 0;
-      width: 100%;
-      background: rgba(26, 26, 26, 0.95);
-      backdrop-filter: blur(10px);
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(14, 14, 14, 0.92);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
-      z-index: 100;
-      padding: 0 2rem;
     }
-    nav .nav-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 56px;
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 54px; padding: 0 32px;
     }
-    nav .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--text);
-      font-weight: 700;
-      font-size: 1.1rem;
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-family: var(--mono); font-weight: 700; font-size: 1rem;
     }
-    nav .logo img { height: 28px; width: 28px; border-radius: 4px; }
-    nav .logo .dot { color: var(--accent); }
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 1.5rem;
+    .nav-logo img { height: 24px; width: 24px; }
+    .nav-logo .g { color: var(--accent); }
+    .nav-links { list-style: none; display: flex; gap: 1.5rem; }
+    .nav-links a {
+      color: var(--text-dim); font-family: var(--mono); font-size: 0.8rem;
+      text-decoration: none; transition: color 0.2s;
     }
-    nav ul li a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-family: var(--font-mono);
-      transition: color 0.2s;
+    .nav-links a:hover { color: var(--accent); text-decoration: none; }
+    .nav-version {
+      font-family: var(--mono); font-size: 0.7rem; color: var(--text-muted);
+      background: var(--bg-card); border: 1px solid var(--border);
+      padding: 2px 10px; border-radius: 12px;
     }
-    nav ul li a:hover { color: var(--accent); }
 
     /* HERO */
     .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 6rem 2rem 4rem;
+      text-align: center; padding: 120px 32px 60px;
       position: relative;
     }
     .hero::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      content: ''; position: absolute; inset: 0;
       background:
-        radial-gradient(ellipse at 30% 20%, rgba(0, 255, 0, 0.04) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 80%, rgba(255, 140, 0, 0.03) 0%, transparent 50%);
+        radial-gradient(ellipse at 30% 30%, rgba(0,255,0,0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 70%, rgba(224,128,48,0.02) 0%, transparent 50%);
       pointer-events: none;
     }
-    .hero-badge {
-      display: inline-block;
-      border: 1px solid var(--accent);
-      color: var(--accent);
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-bottom: 1.5rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
+    .hero-flame { width: 64px; height: 64px; margin: 0 auto 16px; filter: drop-shadow(0 0 20px rgba(255,100,0,0.4)); }
     .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
-      font-weight: 800;
-      line-height: 1.1;
-      margin-bottom: 1.5rem;
-      letter-spacing: -0.02em;
+      font-family: var(--mono); font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800; letter-spacing: 4px; color: var(--accent);
+      text-shadow: 0 0 40px rgba(0,255,0,0.2); margin-bottom: 8px;
     }
-    .hero h1 .accent { color: var(--accent); }
-    .hero h1 .orange { color: var(--orange); }
-    .hero p.tagline {
-      font-size: 1.25rem;
-      color: var(--text-muted);
-      max-width: 640px;
-      margin-bottom: 2.5rem;
-      line-height: 1.7;
+    .hero-sub {
+      font-size: 15px; color: var(--text-dim); font-weight: 300;
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 24px;
     }
-    .hero-actions {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
+    .hero-desc {
+      max-width: 680px; margin: 0 auto 32px; font-size: 1.1rem;
+      color: var(--text-dim); line-height: 1.8;
     }
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 28px;
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
-      text-decoration: none;
-      transition: all 0.2s;
-      border: none;
-      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 11px 26px; border-radius: 6px;
+      font-family: var(--mono); font-size: 0.85rem;
+      text-decoration: none; transition: all 0.2s; border: none; cursor: pointer;
     }
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
-      font-weight: 700;
-    }
-    .btn-primary:hover { background: var(--accent-dim); box-shadow: 0 0 20px var(--accent-glow); }
-    .btn-secondary {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn:hover { text-decoration: none; }
+    .btn-primary { background: var(--accent); color: #000; font-weight: 700; }
+    .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
 
     /* SECTION COMMON */
-    section {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 5rem 2rem;
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+    section { padding: 72px 0; }
+    .sec-label {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 6px;
     }
-    .section-label {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      margin-bottom: 0.5rem;
-    }
-    .section-title {
-      font-size: 2.2rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
-    .section-desc {
-      color: var(--text-muted);
-      max-width: 600px;
-      margin-bottom: 3rem;
-      font-size: 1.05rem;
-    }
+    .sec-title { font-size: 2rem; font-weight: 700; margin-bottom: 10px; }
+    .sec-desc { color: var(--text-dim); max-width: 600px; margin-bottom: 40px; font-size: 1rem; }
+    hr.div { border: none; border-top: 1px solid var(--border); max-width: 1100px; margin: 0 auto; }
 
-    /* ARCHITECTURE DIAGRAM */
-    .arch-diagram {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 2.5rem;
-      overflow-x: auto;
-      margin-bottom: 2rem;
+    /* WHAT IS WHIM - PRODUCT OVERVIEW */
+    .product-statement {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 40px; margin-bottom: 40px;
     }
-    .arch-nodes {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-      align-items: center;
+    .product-statement h3 {
+      font-family: var(--mono); font-size: 1.1rem; color: var(--accent); margin-bottom: 12px;
     }
-    .arch-tier {
-      display: flex;
-      gap: 1.5rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      width: 100%;
+    .product-statement p { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 12px; line-height: 1.8; }
+    .product-statement p:last-child { margin-bottom: 0; }
+
+    /* TAB SHOWCASE */
+    .tab-strip {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 32px;
+      padding: 16px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
     }
+    .tab-pill {
+      font-family: var(--mono); font-size: 0.7rem; font-weight: 600;
+      padding: 4px 12px; border-radius: 4px; letter-spacing: 0.5px;
+      border: 1px solid var(--border); color: var(--text-dim);
+      transition: all 0.2s; cursor: default;
+    }
+    .tab-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .tab-pill.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+    /* FEATURE GRID */
+    .feat-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;
+    }
+    .feat-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 24px; transition: border-color 0.2s;
+    }
+    .feat-card:hover { border-color: var(--border-hi); }
+    .feat-card .fc-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .feat-card .fc-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .feat-card .fc-dot.green { background: var(--accent); }
+    .feat-card .fc-dot.orange { background: var(--orange); }
+    .feat-card .fc-dot.cyan { background: var(--cyan); }
+    .feat-card .fc-dot.yellow { background: var(--yellow); }
+    .feat-card .fc-dot.red { background: var(--red); }
+    .feat-card .fc-name { font-family: var(--mono); font-weight: 700; font-size: 0.95rem; }
+    .feat-card .fc-tag {
+      font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted);
+      background: var(--bg); padding: 2px 8px; border-radius: 4px; margin-left: auto;
+    }
+    .feat-card p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+
+    /* SCREENSHOTS */
+    .ss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
+    .ss-card {
+      border: 1px solid var(--border-hi); border-radius: 10px; overflow: hidden; background: var(--bg-card);
+    }
+    .ss-card img { width: 100%; }
+    .ss-cap {
+      padding: 8px 14px; font-size: 0.75rem; color: var(--text-dim);
+      font-family: var(--mono); border-top: 1px solid var(--border); background: var(--bg-elevated);
+    }
+    .ss-phone-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 32px 0; }
+    .ss-phone-grid .ss-card img { max-height: 420px; object-fit: contain; background: #111; }
+
+    /* ARCHITECTURE */
+    .arch-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 32px; font-family: var(--mono); font-size: 0.8rem; color: var(--text-dim);
+      overflow-x: auto; margin-bottom: 24px;
+    }
+    .arch-tier { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; margin: 16px 0; }
     .arch-node {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.2rem 1.5rem;
-      min-width: 180px;
-      text-align: center;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 18px; min-width: 170px; text-align: center; transition: all 0.2s;
     }
-    .arch-node:hover {
-      border-color: var(--accent);
-      box-shadow: 0 0 12px var(--accent-glow);
-    }
-    .arch-node .node-icon {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-      display: block;
-    }
-    .arch-node .node-name {
-      font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--accent);
-      margin-bottom: 0.3rem;
-    }
-    .arch-node .node-desc {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
-    .arch-connector {
-      display: flex;
-      justify-content: center;
-      color: var(--border);
-      font-family: var(--font-mono);
-      font-size: 1.2rem;
-      letter-spacing: 0.3em;
-    }
-    .arch-label {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      text-align: center;
-      padding: 0.5rem 1rem;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 20px;
+    .arch-node:hover { border-color: var(--accent); box-shadow: 0 0 12px var(--accent-glow); }
+    .arch-node .an-name { font-weight: 700; color: var(--accent); font-size: 0.85rem; margin-bottom: 4px; }
+    .arch-node .an-desc { font-size: 0.72rem; color: var(--text-dim); line-height: 1.4; }
+    .arch-node.orange .an-name { color: var(--orange); }
+    .arch-node.orange:hover { border-color: var(--orange); box-shadow: 0 0 12px var(--orange-glow); }
+    .arch-node.cyan .an-name { color: var(--cyan); }
+    .arch-flow { text-align: center; color: var(--text-muted); font-size: 0.75rem; padding: 8px 0; letter-spacing: 0.1em; }
+    .arch-tag {
+      display: inline-block; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;
+      letter-spacing: 0.15em; padding: 4px 14px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 20px; margin: 8px auto; text-align: center;
     }
 
-    /* COMPONENTS GRID */
-    .comp-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 1.2rem;
+    /* CONNECTIVITY TABLE */
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.82rem; }
+    th {
+      background: var(--bg-elevated); color: var(--blue); font-weight: 600;
+      text-align: left; padding: 8px 10px; border: 1px solid var(--border);
+      font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px;
     }
-    .comp-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.5rem;
-      transition: border-color 0.2s, transform 0.2s;
-    }
-    .comp-card:hover {
-      border-color: var(--orange);
-      transform: translateY(-2px);
-    }
-    .comp-card .comp-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 0.8rem;
-    }
-    .comp-card .comp-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      flex-shrink: 0;
-    }
-    .comp-card .comp-dot.orange { background: var(--orange); }
-    .comp-card .comp-dot.cyan { background: var(--cyan); }
-    .comp-card .comp-dot.red { background: var(--red); }
-    .comp-card .comp-name {
-      font-family: var(--font-mono);
-      font-weight: 700;
-      font-size: 1rem;
-    }
-    .comp-card .comp-tag {
-      font-family: var(--font-mono);
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      background: var(--bg);
-      padding: 2px 8px;
-      border-radius: 4px;
-      margin-left: auto;
-    }
-    .comp-card p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      line-height: 1.5;
-    }
+    td { padding: 8px 10px; border: 1px solid var(--border); }
+    tr:nth-child(even) td { background: var(--bg-card); }
+    td code { font-family: var(--mono); font-size: 0.8rem; color: var(--accent); }
 
-    /* FEATURES STRIP */
-    .features-strip {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 1.5rem;
-      margin-top: 2rem;
+    /* TERMINAL BLOCK */
+    .term {
+      background: #0a0a0a; border: 1px solid var(--border); border-radius: 10px;
+      overflow: hidden; margin: 24px 0; max-width: 720px;
     }
-    .feature-item {
-      padding: 1.5rem;
-      border-left: 2px solid var(--accent);
-      background: var(--bg-surface);
-      border-radius: 0 8px 8px 0;
+    .term-head {
+      background: var(--bg-surface); padding: 8px 14px;
+      display: flex; align-items: center; gap: 6px; border-bottom: 1px solid var(--border);
     }
-    .feature-item h4 {
-      font-family: var(--font-mono);
-      font-size: 0.9rem;
-      margin-bottom: 0.4rem;
-      color: var(--text);
+    .term-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .term-dot.r { background: #ff5f56; } .term-dot.y { background: #ffbd2e; } .term-dot.g { background: #27c93f; }
+    .term-title { font-family: var(--mono); font-size: 0.7rem; color: var(--text-muted); margin-left: 8px; }
+    .term-body {
+      padding: 16px 20px; font-family: var(--mono); font-size: 0.82rem;
+      line-height: 1.9; color: var(--text);
     }
-    .feature-item p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-    }
+    .term-body .p { color: var(--accent); }
+    .term-body .c { color: var(--text-muted); }
 
     /* DOWNLOADS */
-    .dl-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5rem;
-    }
+    .dl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
     .dl-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 2rem;
-      text-align: center;
-      transition: border-color 0.2s;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 28px; text-align: center; transition: border-color 0.2s;
     }
     .dl-card:hover { border-color: var(--orange); }
-    .dl-card .dl-icon {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-    }
-    .dl-card h3 {
-      font-family: var(--font-mono);
-      margin-bottom: 0.5rem;
-    }
-    .dl-card p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 1.2rem;
-    }
+    .dl-card .dl-icon { font-size: 2.2rem; margin-bottom: 12px; }
+    .dl-card h3 { font-family: var(--mono); margin-bottom: 6px; font-size: 1rem; }
+    .dl-card p { font-size: 0.82rem; color: var(--text-dim); margin-bottom: 16px; }
     .dl-card .btn { width: 100%; justify-content: center; }
 
     /* COMMUNITY */
-    .community-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
+    .comm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .comm-card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 24px; transition: border-color 0.2s;
     }
-    .community-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 2rem;
-      transition: border-color 0.2s;
-    }
-    .community-card:hover { border-color: var(--accent); }
-    .community-card h3 {
-      font-family: var(--font-mono);
-      margin-bottom: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .community-card p {
-      font-size: 0.9rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
+    .comm-card:hover { border-color: var(--accent); }
+    .comm-card h3 { font-family: var(--mono); font-size: 0.9rem; margin-bottom: 8px; }
+    .comm-card p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
 
-    /* QUICK START TERMINAL */
-    .terminal-block {
-      background: #0d0d0d;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-      margin: 2rem 0;
-      max-width: 700px;
+    /* VOICE STATE STRIP */
+    .voice-states {
+      display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0;
     }
-    .terminal-header {
-      background: var(--bg-surface);
-      padding: 8px 14px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      border-bottom: 1px solid var(--border);
+    .vs {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 6px; font-family: var(--mono); font-size: 0.75rem;
+      background: var(--bg-card); border: 1px solid var(--border);
     }
-    .terminal-dot {
-      width: 10px; height: 10px; border-radius: 50%;
-    }
-    .terminal-dot.r { background: #ff5f56; }
-    .terminal-dot.y { background: #ffbd2e; }
-    .terminal-dot.g { background: #27c93f; }
-    .terminal-title {
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-left: 8px;
-    }
-    .terminal-body {
-      padding: 1.2rem 1.5rem;
-      font-family: var(--font-mono);
-      font-size: 0.85rem;
-      line-height: 1.8;
-      color: var(--text);
-    }
-    .terminal-body .prompt { color: var(--accent); }
-    .terminal-body .comment { color: var(--text-muted); }
-    .terminal-body .cmd { color: var(--text); }
+    .vs-dot { width: 8px; height: 8px; border-radius: 50%; }
 
     /* FOOTER */
     footer {
-      border-top: 1px solid var(--border);
-      padding: 3rem 2rem;
-      text-align: center;
+      border-top: 1px solid var(--border); padding: 40px 32px; text-align: center;
     }
-    footer .footer-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    footer p {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      font-family: var(--font-mono);
-    }
-    footer .footer-links {
-      margin-top: 1rem;
-      display: flex;
-      gap: 1.5rem;
-      justify-content: center;
-    }
-    footer .footer-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.8rem;
-      font-family: var(--font-mono);
-      transition: color 0.2s;
-    }
-    footer .footer-links a:hover { color: var(--accent); }
-
-    /* STATUS PULSE */
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    .status-live {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--font-mono);
-      font-size: 0.75rem;
-      color: var(--accent);
-    }
-    .status-live .pulse-dot {
-      width: 6px; height: 6px;
-      background: var(--accent);
-      border-radius: 50%;
-      animation: pulse 2s ease-in-out infinite;
-    }
+    footer p { color: var(--text-muted); font-size: 0.8rem; font-family: var(--mono); }
+    .footer-links { margin-top: 12px; display: flex; gap: 1.5rem; justify-content: center; }
+    .footer-links a { color: var(--text-muted); font-size: 0.75rem; font-family: var(--mono); text-decoration: none; }
+    .footer-links a:hover { color: var(--accent); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+    .pulse-dot { width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s ease-in-out infinite;display:inline-block; }
 
     /* RESPONSIVE */
     @media (max-width: 768px) {
-      nav ul { display: none; }
-      .arch-tier { flex-direction: column; align-items: center; }
-      .arch-node { min-width: auto; width: 100%; max-width: 320px; }
-      .comp-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .ss-grid { grid-template-columns: 1fr; }
+      .ss-phone-grid { grid-template-columns: 1fr 1fr; }
+      .feat-grid { grid-template-columns: 1fr; }
       .dl-grid { grid-template-columns: 1fr; }
-      .community-grid { grid-template-columns: 1fr; }
-      section { padding: 3rem 1.2rem; }
+      .comm-grid { grid-template-columns: 1fr; }
+      section { padding: 48px 0; }
+      .wrap { padding: 0 16px; }
+      .product-statement { padding: 24px; }
+      .arch-tier { flex-direction: column; align-items: center; }
+      .arch-node { min-width: auto; width: 100%; max-width: 300px; }
     }
-
-    /* DIVIDER */
-    .divider {
-      max-width: 1200px;
-      margin: 0 auto;
-      border: none;
-      border-top: 1px solid var(--border);
+    @media (max-width: 480px) {
+      .ss-phone-grid { grid-template-columns: 1fr; }
+      .tab-strip { padding: 10px; }
     }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="#" class="logo">
-      <img src="assets/Whim.png" alt="Whim">
-      whimgo<span class="dot">.io</span>
+    <a href="#" class="nav-logo">
+      <img src="assets/fire.png" alt="Whim">
+      whim<span class="g">go</span>.io
     </a>
-    <ul>
-      <li><a href="#architecture">Architecture</a></li>
-      <li><a href="#components">Components</a></li>
+    <ul class="nav-links">
+      <li><a href="#what">About</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#arch">Architecture</a></li>
       <li><a href="#start">Get Started</a></li>
       <li><a href="#community">Community</a></li>
       <li><a href="https://github.com/scarter84" target="_blank">GitHub</a></li>
     </ul>
+    <span class="nav-version">v0.3.4</span>
   </div>
 </nav>
 
 <!-- HERO -->
-<section class="hero">
-  <span class="hero-badge">Open Source &middot; Local-First &middot; Sovereign AI</span>
-  <h1>Build AI systems<br>that run on <span class="accent">your</span> hardware<span class="orange">.</span></h1>
-  <p class="tagline">
-    Whim is an open-source framework for sovereign, local-first AI &mdash;
-    from your desktop terminal to your vehicle dashboard.
-    No cloud dependencies. No data leaving your mesh. Your models, your rules.
+<header class="hero">
+  <img class="hero-flame" src="assets/fire.png" alt="Whim">
+  <h1>WHIM</h1>
+  <div class="hero-sub">Local-First AI Terminal</div>
+  <p class="hero-desc">
+    A unified desktop and mobile ecosystem for voice AI, local LLM chat, weather radar,
+    APRS radio, geofencing, IoT control, and vehicle integration.
+    No cloud dependencies. No subscriptions. Your hardware, your models, your rules.
   </p>
   <div class="hero-actions">
     <a href="#start" class="btn btn-primary">Get Started</a>
-    <a href="#architecture" class="btn btn-secondary">See the Architecture</a>
+    <a href="#what" class="btn btn-ghost">What is Whim?</a>
+  </div>
+</header>
+
+<hr class="div">
+
+<!-- WHAT IS WHIM -->
+<section id="what">
+  <div class="wrap">
+    <div class="sec-label">// what is whim</div>
+    <h2 class="sec-title">The Product</h2>
+
+    <div class="product-statement">
+      <h3>One terminal. Everything connected.</h3>
+      <p>
+        Whim is a Python desktop application (Tkinter) with 18 module tabs organized across two rows.
+        It connects to local LLMs through Ollama (DeepSeek R1:32B, Llama 3.1:8B), drives a voice
+        pipeline with XTTS v2 text-to-speech and wake word detection, controls Samsung SmartThings
+        devices, integrates Signal and Discord messaging, runs a weather radar with NEXRAD overlay,
+        monitors APRS amateur radio stations, tracks livestock via geofencing, and manages Android
+        devices through ADB.
+      </p>
+      <p>
+        A companion mobile app (Whim.m) runs on Android phones and tablets, connecting over a reverse
+        SSH tunnel through a VPS or directly via Tailscale mesh VPN. A vehicle dashboard interface
+        (Whim.v) runs on a 13.6" Android head unit with its own local model for offline autonomy.
+      </p>
+      <p>
+        All AI inference is local. All data stays on your network. The system works in a tunnel,
+        in a field, in a garage -- anywhere your hardware lives.
+      </p>
+    </div>
+
+    <!-- TAB BAR REPLICA -->
+    <div class="tab-strip">
+      <span class="tab-pill active">CHAT</span>
+      <span class="tab-pill">WHIM.AI</span>
+      <span class="tab-pill">SMARTTHINGS</span>
+      <span class="tab-pill">SYS STATUS</span>
+      <span class="tab-pill">AVR LAB</span>
+      <span class="tab-pill">VOICE ENGINE</span>
+      <span class="tab-pill">PERSONA</span>
+      <span class="tab-pill">TRV CIPHER</span>
+      <span class="tab-pill">DOPPLER</span>
+      <span class="tab-pill">GEOF</span>
+      <span class="tab-pill">HAM</span>
+      <span class="tab-pill">NODEFLOW</span>
+      <span class="tab-pill">ARCHIVE</span>
+      <span class="tab-pill">DISCORD</span>
+      <span class="tab-pill">SIGNAL</span>
+      <span class="tab-pill">SS</span>
+      <span class="tab-pill">LIBRARY</span>
+      <span class="tab-pill">SETTINGS</span>
+    </div>
+
+    <div class="ss-grid">
+      <div class="ss-card">
+        <img src="assets/whim_screenshot.png" alt="Whim Desktop Terminal">
+        <div class="ss-cap">Whim Terminal -- Desktop AI workspace</div>
+      </div>
+      <div class="ss-card">
+        <img src="assets/GeoF.png" alt="GeoF Tab">
+        <div class="ss-cap">GeoF -- Geofence map with collar status tracking</div>
+      </div>
+    </div>
+
+    <div class="ss-grid">
+      <div class="ss-card">
+        <img src="assets/nodeflow.png" alt="NodeFlow visual editor">
+        <div class="ss-cap">NodeFlow -- Visual node editor showing active droids and data flow</div>
+      </div>
+      <div class="ss-card">
+        <img src="assets/nodeflow2.png" alt="NodeFlow expanded">
+        <div class="ss-cap">NodeFlow -- LLM reasoning chains and OpenClaw telemetry</div>
+      </div>
+    </div>
+
+    <div class="ss-phone-grid">
+      <div class="ss-card">
+        <img src="assets/phone_rec_tab_v4.jpg" alt="Whim.m recorder">
+        <div class="ss-cap">Whim.m -- REC tab</div>
+      </div>
+      <div class="ss-card">
+        <img src="assets/phone_wake_tab_v4.jpg" alt="Whim.m wake word">
+        <div class="ss-cap">Whim.m -- WAKE tab</div>
+      </div>
+      <div class="ss-card">
+        <img src="assets/phone_geof_tab.jpg" alt="Whim.m geofencing">
+        <div class="ss-cap">Whim.m -- GeoF tab</div>
+      </div>
+    </div>
   </div>
 </section>
 
-<hr class="divider">
+<hr class="div">
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="sec-label">// features</div>
+    <h2 class="sec-title">What It Does</h2>
+    <p class="sec-desc">Every tab is a standalone module. Pick the ones you need, disable the rest. Build your own stack.</p>
+
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot green"></span>
+          <span class="fc-name">Whim.AI -- Local LLM Console</span>
+          <span class="fc-tag">Core</span>
+        </div>
+        <p>Full AI chat with local Ollama models. System presets, observability panel, context metering, tool trace, output templates, and token usage tracking. Switch between DeepSeek R1:32B (reasoning), Llama 3.1:8B (fast chat), and Qwen (tool use) from the header dropdown.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot orange"></span>
+          <span class="fc-name">Voice Engine</span>
+          <span class="fc-tag">Audio</span>
+        </div>
+        <p>Wake word detection (openWakeWord / Porcupine), live spectrogram (Whim-Scope), dynamic gain, high-pass filter, AGC, parametric EQ, spectral subtraction, VAD, and a confidence ghost bar. Tuned for noisy vehicle and outdoor environments.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot orange"></span>
+          <span class="fc-name">AVR Lab + Persona</span>
+          <span class="fc-tag">Voice</span>
+        </div>
+        <p>XTTS v2 text-to-speech with custom speaker references. Persona manager with coined response playlists per voice clone, confidence-gated, context-aware, pre-rendered. Spectrogram visualization and Table Reads output.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot cyan"></span>
+          <span class="fc-name">Doppler -- Weather Radar</span>
+          <span class="fc-tag">Telemetry</span>
+        </div>
+        <p>Embedded OSM tile map with NWS NEXRAD precipitation overlay. Open-Meteo conditions, 7-day forecast, anemometer, NWR audio via web stream and RTL-SDR. Severe weather alerts pushed to mobile devices.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot green"></span>
+          <span class="fc-name">GeoF -- Geofence Tracker</span>
+          <span class="fc-tag">Location</span>
+        </div>
+        <p>Canvas map with fence pin management, collar status table, LoRa bridge integration, and 20-minute heartbeat monitor. Originally built for livestock tracking on rural property.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot green"></span>
+          <span class="fc-name">HAM -- APRS Monitor</span>
+          <span class="fc-tag">Radio</span>
+        </div>
+        <p>Amateur radio station monitor with embedded tile map, Direwolf integration (KISS/AGWPE/simulate), station list with distance filtering, base station config, and raw packet log.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot yellow"></span>
+          <span class="fc-name">SmartThings</span>
+          <span class="fc-tag">IoT</span>
+        </div>
+        <p>Samsung SmartThings device browser with scan, filter, favorites, device detail, and recently-controlled history. Control lights, locks, and sensors from the terminal.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot orange"></span>
+          <span class="fc-name">TRV Cipher</span>
+          <span class="fc-tag">Transcription</span>
+        </div>
+        <p>Audio transcription workstation with spectrogram, playback transport, Whisper-based transcription, ODT export, and scrub tools. Process voice recordings into searchable text.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot orange"></span>
+          <span class="fc-name">NodeFlow</span>
+          <span class="fc-tag">Visual</span>
+        </div>
+        <p>Visual node-based flow editor showing active droids, LLM reasoning chains, OpenClaw telemetry, and data flow connections. Drag-and-drop canvas with auto-poll and node inspector.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot cyan"></span>
+          <span class="fc-name">Signal + Discord</span>
+          <span class="fc-tag">Messaging</span>
+        </div>
+        <p>Integrated messaging through Signal Desktop (via signal-cli) and Discord bot. Send and receive messages directly from the terminal.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot green"></span>
+          <span class="fc-name">Screen Share + ADB Portal</span>
+          <span class="fc-tag">Devices</span>
+        </div>
+        <p>MJPEG screen share server with QR code pairing, phone camera feed, and desktop preview. ADB portal for APK installation, emulator management, and device screenshots.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot red"></span>
+          <span class="fc-name">OpenClaw Gateway</span>
+          <span class="fc-tag">Protocol</span>
+        </div>
+        <p>JSON-RPC over WebSocket (port 18789). The AI agent protocol layer connecting the terminal to Ollama inference with model switching, context injection, tool definitions, and multi-model routing.</p>
+      </div>
+    </div>
+
+    <!-- VOICE STATE SYSTEM -->
+    <h3 style="font-family: var(--mono); font-size: 0.9rem; margin: 40px 0 12px; color: var(--text);">Conversational Voice States</h3>
+    <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 16px;">The voice pipeline uses state-aware backchannel cues -- color-coded, timed, and honest about what the system is actually doing.</p>
+    <div class="voice-states">
+      <div class="vs"><span class="vs-dot" style="background:#7ED957"></span> Listening</div>
+      <div class="vs"><span class="vs-dot" style="background:#4FD1C5"></span> Captured</div>
+      <div class="vs"><span class="vs-dot" style="background:#7AA2F7"></span> Thinking</div>
+      <div class="vs"><span class="vs-dot" style="background:#E0AF68"></span> Holding</div>
+      <div class="vs"><span class="vs-dot" style="background:#EDEDED"></span> Speaking</div>
+      <div class="vs"><span class="vs-dot" style="background:#F7768E"></span> Interrupted</div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
 
 <!-- ARCHITECTURE -->
-<section id="architecture">
-  <div class="section-label">// system topology</div>
-  <h2 class="section-title">Architecture</h2>
-  <p class="section-desc">
-    A federated mesh of nodes &mdash; each capable of autonomous operation,
-    syncing when connected, independent when offline.
-  </p>
+<section id="arch">
+  <div class="wrap">
+    <div class="sec-label">// system topology</div>
+    <h2 class="sec-title">Architecture</h2>
+    <p class="sec-desc">A federated mesh of nodes. Each device operates autonomously, syncs when connected, stays independent when offline.</p>
 
-  <div class="arch-diagram">
-    <div class="arch-nodes">
+    <div class="arch-box">
+      <div style="text-align:center"><span class="arch-tag">Operator</span></div>
+      <div class="arch-flow">|</div>
 
-      <!-- Tier 1: Operator -->
-      <div class="arch-label">OPERATOR</div>
-      <div class="arch-connector">|</div>
-
-      <!-- Tier 2: Command Center -->
       <div class="arch-tier">
-        <div class="arch-node" style="border-color: var(--accent); min-width: 340px;">
-          <span class="node-icon">&#9641;</span>
-          <div class="node-name">Whim Terminal</div>
-          <div class="node-desc">
-            Desktop AI command center &middot; 18 tabs &middot; Tkinter<br>
-            LLM routing &middot; Voice engine &middot; APRS/HAM &middot; GeoF
-          </div>
+        <div class="arch-node" style="min-width: 300px;">
+          <div class="an-name">Whim Terminal</div>
+          <div class="an-desc">Desktop command center / 18 tabs / Tkinter<br>LLM routing / Voice engine / APRS / GeoF / IoT</div>
         </div>
         <div class="arch-node">
-          <span class="node-icon">&#9881;</span>
-          <div class="node-name">OpenClaw Gateway</div>
-          <div class="node-desc">
-            JSON-RPC WebSocket &middot; :18789<br>
-            AI agent protocol layer
-          </div>
+          <div class="an-name">OpenClaw Gateway</div>
+          <div class="an-desc">JSON-RPC WebSocket :18789<br>AI agent protocol layer</div>
         </div>
         <div class="arch-node">
-          <span class="node-icon">&#9707;</span>
-          <div class="node-name">Ollama (Local LLMs)</div>
-          <div class="node-desc">
-            DeepSeek R1:32B &middot; Llama 3.1:8B<br>
-            Zero cloud inference
-          </div>
+          <div class="an-name">Ollama</div>
+          <div class="an-desc">DeepSeek R1:32B / Llama 3.1:8B<br>Local inference / zero cloud</div>
         </div>
       </div>
 
-      <div class="arch-connector">&#8595; &nbsp; Tailscale Mesh + VPS Tunnel &nbsp; &#8595;</div>
+      <div class="arch-flow">Tailscale Mesh VPN + VPS Reverse SSH Tunnel</div>
 
-      <!-- Tier 3: Edge Nodes -->
       <div class="arch-tier">
-        <div class="arch-node" style="border-color: var(--orange);">
-          <span class="node-icon">&#128241;</span>
-          <div class="node-name" style="color: var(--orange);">Whim.m</div>
-          <div class="node-desc">
-            Mobile companion &middot; Android APK<br>
-            5 tabs &middot; Recorder &middot; AI Chat
-          </div>
+        <div class="arch-node orange">
+          <div class="an-name">Whim.m</div>
+          <div class="an-desc">Android companion / 5-tab WebView<br>Recorder / AI Chat / Wake / Devices</div>
         </div>
-        <div class="arch-node" style="border-color: var(--orange);">
-          <span class="node-icon">&#128663;</span>
-          <div class="node-name" style="color: var(--orange);">Whim.v</div>
-          <div class="node-desc">
-            Vehicle dash &middot; 13.6" head unit<br>
-            Local Qwen 1.5B &middot; Offline-capable
-          </div>
+        <div class="arch-node orange">
+          <div class="an-name">Whim.v</div>
+          <div class="an-desc">Vehicle dash / 13.6" head unit<br>Local Qwen 1.5B / offline-capable</div>
         </div>
-        <div class="arch-node" style="border-color: var(--cyan);">
-          <span class="node-icon">&#128172;</span>
-          <div class="node-name" style="color: var(--cyan);">Enoch (Discord)</div>
-          <div class="node-desc">
-            OpenClaw bot persona<br>
-            MeritClaw progression &middot; XTTS voice
-          </div>
+        <div class="arch-node">
+          <div class="an-name">WISP</div>
+          <div class="an-desc">Resident AI agent<br>System ops / diagnostics</div>
         </div>
       </div>
 
-      <div class="arch-connector">&#8595; &nbsp; Services Layer &nbsp; &#8595;</div>
+      <div class="arch-flow">Services</div>
 
-      <!-- Tier 4: Services -->
       <div class="arch-tier">
         <div class="arch-node">
-          <span class="node-icon">&#127908;</span>
-          <div class="node-name">Voice Engine</div>
-          <div class="node-desc">XTTS v2 &middot; Wake word &middot; VAD &middot; Whim-Scope</div>
+          <div class="an-name">XTTS v2</div>
+          <div class="an-desc">Voice synthesis / Coqui / GPU</div>
         </div>
         <div class="arch-node">
-          <span class="node-icon">&#127760;</span>
-          <div class="node-name">GeoF</div>
-          <div class="node-desc">Geofencing &middot; APRS &middot; Location awareness</div>
+          <div class="an-name">Journal Ingest</div>
+          <div class="an-desc">Flask :8088 / upload pipeline</div>
         </div>
         <div class="arch-node">
-          <span class="node-icon">&#128225;</span>
-          <div class="node-name">HAM / Doppler</div>
-          <div class="node-desc">Radio telemetry &middot; Weather radar &middot; Station tracking</div>
+          <div class="an-name">Signal + Discord</div>
+          <div class="an-desc">Messaging channels</div>
         </div>
         <div class="arch-node">
-          <span class="node-icon">&#129302;</span>
-          <div class="node-name">WISP</div>
-          <div class="node-desc">Resident AI agent &middot; System ops &middot; Diagnostics</div>
+          <div class="an-name">SmartThings</div>
+          <div class="an-desc">IoT device control</div>
         </div>
       </div>
+    </div>
 
-    </div>
-  </div>
+    <h3 style="font-family: var(--mono); font-size: 0.9rem; margin: 24px 0 12px; color: var(--text);">Network Topology</h3>
+    <table>
+      <thead>
+        <tr><th>Device</th><th>LAN IP</th><th>Tailscale IP</th><th>Role</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PC (CARRAMint)</td><td><code>192.168.1.231</code></td><td><code>100.69.17.20</code></td><td>Server hub</td></tr>
+        <tr><td>Galaxy S22</td><td>--</td><td><code>100.77.59.2</code></td><td>Primary mobile</td></tr>
+        <tr><td>Galaxy S9</td><td><code>192.168.1.198</code></td><td><code>100.97.96.1</code></td><td>Secondary mobile</td></tr>
+        <tr><td>Lenovo Tablet</td><td><code>192.168.1.112</code></td><td><code>100.64.255.124</code></td><td>Tablet client</td></tr>
+      </tbody>
+    </table>
 
-  <div class="features-strip">
-    <div class="feature-item">
-      <h4>Federated Nodes</h4>
-      <p>Each device operates autonomously. Lose connection in a tunnel &mdash; the vehicle keeps running on its local model.</p>
-    </div>
-    <div class="feature-item">
-      <h4>Tailscale Mesh</h4>
-      <p>WireGuard-based direct connections with automatic NAT traversal. VPS tunnel fallback for anywhere-access.</p>
-    </div>
-    <div class="feature-item">
-      <h4>Zero Cloud Dependency</h4>
-      <p>All LLM inference runs on local hardware via Ollama. Your data never leaves your network.</p>
-    </div>
-    <div class="feature-item">
-      <h4>Modular Tabs</h4>
-      <p>Build your own stack. Enable only the tabs you need. Share community modules. Keep it lightweight.</p>
-    </div>
+    <h3 style="font-family: var(--mono); font-size: 0.9rem; margin: 24px 0 12px; color: var(--text);">Connection Channels</h3>
+    <table>
+      <thead>
+        <tr><th>Channel</th><th>Protocol</th><th>Port</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>OpenClaw Gateway</td><td>WebSocket</td><td>18789</td><td>Core command bus</td></tr>
+        <tr><td>Whim.m Server</td><td>HTTP</td><td>8089</td><td>Mobile app backend</td></tr>
+        <tr><td>Journal Ingest</td><td>HTTP multipart</td><td>8088</td><td>Voice recording upload</td></tr>
+        <tr><td>Screen Share</td><td>MJPEG</td><td>8091</td><td>Desktop-to-phone stream</td></tr>
+        <tr><td>SSH Tunnel</td><td>Reverse SSH via VPS</td><td>8089</td><td>Cross-network access</td></tr>
+        <tr><td>Ollama</td><td>HTTP REST</td><td>11434</td><td>LLM inference</td></tr>
+        <tr><td>Signal CLI</td><td>HTTP</td><td>8080</td><td>Messaging</td></tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
-<hr class="divider">
-
-<!-- COMPONENTS -->
-<section id="components">
-  <div class="section-label">// component registry</div>
-  <h2 class="section-title">The Ecosystem</h2>
-  <p class="section-desc">
-    Every piece is independent, every piece connects. Pick what you need, ignore the rest.
-  </p>
-
-  <div class="comp-grid">
-    <div class="comp-card">
-      <div class="comp-header">
-        <span class="comp-dot"></span>
-        <span class="comp-name">Whim Terminal</span>
-        <span class="comp-tag">Desktop</span>
-      </div>
-      <p>The command center. An 18-tab Tkinter application with LLM model routing, voice engine, APRS/HAM radio, geofencing, audio capture, device management, and a full settings panel. Cross-platform: Linux, macOS, Windows.</p>
-    </div>
-
-    <div class="comp-card">
-      <div class="comp-header">
-        <span class="comp-dot orange"></span>
-        <span class="comp-name">Whim.m</span>
-        <span class="comp-tag">Mobile</span>
-      </div>
-      <p>Android companion app served as a 5-tab WebView. Voice recording, file library, AI chat, wake word detection, and cross-device messaging. Connects via VPS tunnel or Tailscale with auto-reconnect.</p>
-    </div>
-
-    <div class="comp-card">
-      <div class="comp-header">
-        <span class="comp-dot orange"></span>
-        <span class="comp-name">Whim.v</span>
-        <span class="comp-tag">Vehicle</span>
-      </div>
-      <p>Vehicle dashboard interface for a 13.6" Android head unit. Runs a local Qwen 1.5B model for offline autonomy. Handles OpenClaw commands, telemetry, and priority-based task delegation.</p>
-    </div>
-
-    <div class="comp-card">
-      <div class="comp-header">
-        <span class="comp-dot"></span>
-        <span class="comp-name">OpenClaw</span>
-        <span class="comp-tag">Protocol</span>
-      </div>
-      <p>The AI gateway protocol. JSON-RPC over WebSocket connecting the terminal to Ollama inference. Supports model switching, context injection, and multi-model routing (DeepSeek for logic, Llama for creative, Qwen for tools).</p>
-    </div>
-
-    <div class="comp-card">
-      <div class="comp-header">
-        <span class="comp-dot cyan"></span>
-        <span class="comp-name">Voice Engine</span>
-        <span class="comp-tag">Audio</span>
-      </div>
-      <p>Full audio pipeline: XTTS v2 text-to-speech with persona voice clones, wake word detection (openWakeWord / Porcupine), live spectrogram (Whim-Scope), gain/HPF/AGC/EQ tuning for noisy environments.</p>
-    </div>
-
-    <div class="comp-card">
-      <div class="comp-header">
-        <span class="comp-dot cyan"></span>
-        <span class="comp-name">GeoF</span>
-        <span class="comp-tag">Location</span>
-      </div>
-      <p>Geofencing and location awareness engine. Integrates with APRS packet radio for station tracking, supports custom geofence zones with trigger actions and notifications.</p>
-    </div>
-
-    <div class="comp-card">
-      <div class="comp-header">
-        <span class="comp-dot cyan"></span>
-        <span class="comp-name">HAM / Doppler</span>
-        <span class="comp-tag">Telemetry</span>
-      </div>
-      <p>Amateur radio integration with Doppler weather radar overlay. APRS raw packet decoding, station list, signal activity visualization, and weather intelligence.</p>
-    </div>
-
-    <div class="comp-card">
-      <div class="comp-header">
-        <span class="comp-dot"></span>
-        <span class="comp-name">WISP</span>
-        <span class="comp-tag">Agent</span>
-      </div>
-      <p>Whim's Integrated Systems Processor. The resident AI agent for system operations, diagnostics, vault browsing, and automated task execution across the mesh.</p>
-    </div>
-
-    <div class="comp-card">
-      <div class="comp-header">
-        <span class="comp-dot red"></span>
-        <span class="comp-name">Enoch / OpenClaw Bot</span>
-        <span class="comp-tag">Discord</span>
-      </div>
-      <p>Discord bot with the MeritClaw progression system. 10 badge tiers that unlock real capabilities: memory vaults, parallel tool execution, voice synthesis, image generation, and proactive assistance.</p>
-    </div>
-  </div>
-</section>
-
-<hr class="divider">
+<hr class="div">
 
 <!-- GET STARTED -->
 <section id="start">
-  <div class="section-label">// quickstart</div>
-  <h2 class="section-title">Get Started</h2>
-  <p class="section-desc">
-    Clone it. Configure it. Run it. No accounts, no cloud keys, no telemetry.
-  </p>
+  <div class="wrap">
+    <div class="sec-label">// get started</div>
+    <h2 class="sec-title">Install & Run</h2>
+    <p class="sec-desc">Clone, configure, launch. No accounts, no cloud keys, no telemetry.</p>
 
-  <div class="terminal-block">
-    <div class="terminal-header">
-      <span class="terminal-dot r"></span>
-      <span class="terminal-dot y"></span>
-      <span class="terminal-dot g"></span>
-      <span class="terminal-title">whim-terminal &mdash; bash</span>
+    <div class="term">
+      <div class="term-head">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-title">whim-terminal -- bash</span>
+      </div>
+      <div class="term-body">
+        <span class="c"># Clone</span><br>
+        <span class="p">$</span> git clone https://github.com/scarter84/whim-terminal.git<br>
+        <span class="p">$</span> cd whim-terminal<br><br>
+        <span class="c"># Environment</span><br>
+        <span class="p">$</span> python3 -m venv venv<br>
+        <span class="p">$</span> venv/bin/pip install -r requirements.txt<br><br>
+        <span class="c"># Local AI (Ollama)</span><br>
+        <span class="p">$</span> curl -fsSL https://ollama.ai/install.sh | sh<br>
+        <span class="p">$</span> ollama pull deepseek-r1:32b<br>
+        <span class="p">$</span> ollama pull llama3.1:8b-16k<br><br>
+        <span class="c"># Launch</span><br>
+        <span class="p">$</span> venv/bin/python openclaw_tkui.py
+      </div>
     </div>
-    <div class="terminal-body">
-      <span class="comment"># Clone the repository</span><br>
-      <span class="prompt">$</span> <span class="cmd">git clone https://github.com/scarter84/whim-terminal.git</span><br>
-      <span class="prompt">$</span> <span class="cmd">cd whim-terminal</span><br><br>
-      <span class="comment"># Set up the environment</span><br>
-      <span class="prompt">$</span> <span class="cmd">python3 -m venv venv</span><br>
-      <span class="prompt">$</span> <span class="cmd">venv/bin/pip install -r requirements.txt</span><br><br>
-      <span class="comment"># Install Ollama (local LLM inference)</span><br>
-      <span class="prompt">$</span> <span class="cmd">curl -fsSL https://ollama.ai/install.sh | sh</span><br>
-      <span class="prompt">$</span> <span class="cmd">ollama pull deepseek-r1:32b</span><br><br>
-      <span class="comment"># Launch</span><br>
-      <span class="prompt">$</span> <span class="cmd">venv/bin/python openclaw_tkui.py</span><br>
-    </div>
-  </div>
 
-  <div class="dl-grid">
-    <div class="dl-card">
-      <div class="dl-icon">&#9641;</div>
-      <h3>Whim Terminal</h3>
-      <p>Desktop command center<br>Linux &middot; macOS &middot; Windows</p>
-      <a href="https://github.com/scarter84/whim-terminal" target="_blank" class="btn btn-secondary">View on GitHub</a>
+    <h3 style="font-family: var(--mono); font-size: 0.9rem; margin: 32px 0 12px; color: var(--text);">Platforms</h3>
+    <div class="dl-grid">
+      <div class="dl-card">
+        <div class="dl-icon">&#9641;</div>
+        <h3>Whim Terminal</h3>
+        <p>Desktop command center<br>Linux (primary) / macOS / Windows</p>
+        <a href="https://github.com/scarter84/whim-terminal" target="_blank" class="btn btn-ghost">GitHub</a>
+      </div>
+      <div class="dl-card">
+        <div class="dl-icon">&#128241;</div>
+        <h3>Whim.m</h3>
+        <p>Mobile companion APK<br>Android 10+ (S22 / S9 / Tablet)</p>
+        <a href="https://github.com/scarter84/whim-terminal/releases" target="_blank" class="btn btn-ghost">Download APK</a>
+      </div>
+      <div class="dl-card">
+        <div class="dl-icon">&#128663;</div>
+        <h3>Whim.v</h3>
+        <p>Vehicle dashboard<br>13.6" Android head unit</p>
+        <span class="btn btn-ghost" style="opacity:0.5;cursor:default;">In Development</span>
+      </div>
     </div>
-    <div class="dl-card">
-      <div class="dl-icon">&#128241;</div>
-      <h3>Whim.m</h3>
-      <p>Mobile companion APK<br>Android 10+</p>
-      <a href="https://github.com/scarter84/whim-terminal/releases" target="_blank" class="btn btn-secondary">Download APK</a>
-    </div>
-    <div class="dl-card">
-      <div class="dl-icon">&#128663;</div>
-      <h3>Whim.v</h3>
-      <p>Vehicle dash interface<br>Android head units</p>
-      <a href="https://github.com/scarter84/whim-terminal/releases" target="_blank" class="btn btn-secondary">Coming Soon</a>
-    </div>
+
+    <h3 style="font-family: var(--mono); font-size: 0.9rem; margin: 32px 0 12px; color: var(--text);">Requirements</h3>
+    <table>
+      <thead>
+        <tr><th>Dependency</th><th>Version</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Python</td><td>3.10+</td><td>Runtime</td></tr>
+        <tr><td>Tkinter</td><td>bundled</td><td>Desktop UI framework</td></tr>
+        <tr><td>Ollama</td><td>latest</td><td>Local LLM inference</td></tr>
+        <tr><td>Tailscale</td><td>optional</td><td>Mesh VPN for mobile/vehicle</td></tr>
+        <tr><td>Coqui XTTS v2</td><td>optional</td><td>Voice synthesis (requires GPU)</td></tr>
+      </tbody>
+    </table>
   </div>
 </section>
 
-<hr class="divider">
+<hr class="div">
 
 <!-- COMMUNITY -->
 <section id="community">
-  <div class="section-label">// community ingest</div>
-  <h2 class="section-title">Build With Us</h2>
-  <p class="section-desc">
-    Whim is built for creators and developers who believe AI should run on hardware you own.
-    Friction-free. Open source. Pushing AI forward together.
-  </p>
+  <div class="wrap">
+    <div class="sec-label">// community</div>
+    <h2 class="sec-title">Build With Us</h2>
+    <p class="sec-desc">
+      Whim is for creators and developers who believe AI should run on hardware you own.
+      Friction-free. Open source. Pushing AI forward together.
+    </p>
 
-  <div class="community-grid">
-    <div class="community-card">
-      <h3>&#128736; Contribute a Module</h3>
-      <p>The tab system is modular by design. Write a new tab, drop it in, share it with the community. GeoF, HAM, Doppler &mdash; they all started as standalone modules. Yours can too.</p>
-    </div>
-    <div class="community-card">
-      <h3>&#128172; Join the Discord</h3>
-      <p>Talk to Enoch (our OpenClaw bot), share your builds, get help with configuration. The community runs on the same sovereign principles as the software.</p>
-    </div>
-    <div class="community-card">
-      <h3>&#128214; Read the Manual</h3>
-      <p>Full system documentation covering architecture, networking topology, voice engine tuning, and deployment guides for every platform.</p>
-    </div>
-    <div class="community-card">
-      <h3>&#127793; Open Source Philosophy</h3>
-      <p>No gated features. No premium tiers. No data collection. AI should evolve alongside the people building with it &mdash; not behind a paywall.</p>
+    <div class="comm-grid">
+      <div class="comm-card">
+        <h3>Write a Module</h3>
+        <p>Every tab is a pluggable Python module. Write your own, drop it in, share it. GeoF, HAM, Doppler -- they all started as standalone modules. The tab system is config-driven: enable what you need, disable the rest.</p>
+      </div>
+      <div class="comm-card">
+        <h3>Join the Discord</h3>
+        <p>Talk to Enoch (the OpenClaw bot), share your builds, debug configurations, and help shape the roadmap. The community runs on the same sovereign principles as the software.</p>
+      </div>
+      <div class="comm-card">
+        <h3>Read the Manual</h3>
+        <p>Full system documentation: architecture topology, voice engine tuning, networking setup, tab reference, and deployment guides for Linux, macOS, Windows, and Android.</p>
+      </div>
+      <div class="comm-card">
+        <h3>Open Source</h3>
+        <p>No gated features. No premium tiers. No data collection. MIT licensed. AI should evolve alongside the people building it, not behind a paywall.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- FOOTER -->
 <footer>
-  <div class="footer-inner">
-    <p>
-      <span class="status-live"><span class="pulse-dot"></span> whimgo.io</span>
-      &nbsp;&middot;&nbsp; Built sovereign &nbsp;&middot;&nbsp; MIT License
-    </p>
-    <div class="footer-links">
-      <a href="https://github.com/scarter84" target="_blank">GitHub</a>
-      <a href="#architecture">Architecture</a>
-      <a href="#components">Components</a>
-      <a href="#start">Downloads</a>
-      <a href="#community">Community</a>
-    </div>
+  <p>
+    <span class="pulse-dot"></span>&nbsp; whimgo.io &nbsp;/&nbsp; MIT License &nbsp;/&nbsp; Built sovereign
+  </p>
+  <div class="footer-links">
+    <a href="https://github.com/scarter84" target="_blank">GitHub</a>
+    <a href="#what">About</a>
+    <a href="#features">Features</a>
+    <a href="#arch">Architecture</a>
+    <a href="#start">Downloads</a>
+    <a href="#community">Community</a>
   </div>
 </footer>
 
