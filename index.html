@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whimgo — Sovereign Local-First AI</title>
+  <meta name="description" content="An open-source framework for building sovereign, local-first AI systems that run on your hardware — from your desktop to your dashboard.">
+  <link rel="icon" type="image/png" href="assets/Whim.png">
+  <style>
+    :root {
+      --bg: #1a1a1a;
+      --bg-surface: #2b2b2b;
+      --bg-elevated: #333333;
+      --accent: #00ff00;
+      --accent-dim: #00cc00;
+      --accent-glow: rgba(0, 255, 0, 0.15);
+      --text: #dce4ee;
+      --text-muted: #8a93a8;
+      --orange: #ff8c00;
+      --orange-dim: #cc7000;
+      --border: #3a3a3a;
+      --red: #ff4444;
+      --cyan: #00e5ff;
+      --font-mono: 'Courier New', 'Consolas', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(26, 26, 26, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      padding: 0 2rem;
+    }
+    nav .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    nav .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    nav .logo img { height: 28px; width: 28px; border-radius: 4px; }
+    nav .logo .dot { color: var(--accent); }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+    nav ul li a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-family: var(--font-mono);
+      transition: color 0.2s;
+    }
+    nav ul li a:hover { color: var(--accent); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background:
+        radial-gradient(ellipse at 30% 20%, rgba(0, 255, 0, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 80%, rgba(255, 140, 0, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-block;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+    .hero h1 .accent { color: var(--accent); }
+    .hero h1 .orange { color: var(--orange); }
+    .hero p.tagline {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+    }
+    .btn-primary:hover { background: var(--accent-dim); box-shadow: 0 0 20px var(--accent-glow); }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* SECTION COMMON */
+    section {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 2rem;
+    }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 0.5rem;
+    }
+    .section-title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .section-desc {
+      color: var(--text-muted);
+      max-width: 600px;
+      margin-bottom: 3rem;
+      font-size: 1.05rem;
+    }
+
+    /* ARCHITECTURE DIAGRAM */
+    .arch-diagram {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.5rem;
+      overflow-x: auto;
+      margin-bottom: 2rem;
+    }
+    .arch-nodes {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      align-items: center;
+    }
+    .arch-tier {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+    }
+    .arch-node {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.2rem 1.5rem;
+      min-width: 180px;
+      text-align: center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .arch-node:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+    .arch-node .node-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .arch-node .node-name {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--accent);
+      margin-bottom: 0.3rem;
+    }
+    .arch-node .node-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .arch-connector {
+      display: flex;
+      justify-content: center;
+      color: var(--border);
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+      letter-spacing: 0.3em;
+    }
+    .arch-label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      text-align: center;
+      padding: 0.5rem 1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    /* COMPONENTS GRID */
+    .comp-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.2rem;
+    }
+    .comp-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .comp-card:hover {
+      border-color: var(--orange);
+      transform: translateY(-2px);
+    }
+    .comp-card .comp-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.8rem;
+    }
+    .comp-card .comp-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .comp-card .comp-dot.orange { background: var(--orange); }
+    .comp-card .comp-dot.cyan { background: var(--cyan); }
+    .comp-card .comp-dot.red { background: var(--red); }
+    .comp-card .comp-name {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .comp-card .comp-tag {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      background: var(--bg);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: auto;
+    }
+    .comp-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* FEATURES STRIP */
+    .features-strip {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .feature-item {
+      padding: 1.5rem;
+      border-left: 2px solid var(--accent);
+      background: var(--bg-surface);
+      border-radius: 0 8px 8px 0;
+    }
+    .feature-item h4 {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+    }
+    .feature-item p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* DOWNLOADS */
+    .dl-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .dl-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      transition: border-color 0.2s;
+    }
+    .dl-card:hover { border-color: var(--orange); }
+    .dl-card .dl-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    .dl-card h3 {
+      font-family: var(--font-mono);
+      margin-bottom: 0.5rem;
+    }
+    .dl-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 1.2rem;
+    }
+    .dl-card .btn { width: 100%; justify-content: center; }
+
+    /* COMMUNITY */
+    .community-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .community-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      transition: border-color 0.2s;
+    }
+    .community-card:hover { border-color: var(--accent); }
+    .community-card h3 {
+      font-family: var(--font-mono);
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .community-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* QUICK START TERMINAL */
+    .terminal-block {
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 2rem 0;
+      max-width: 700px;
+    }
+    .terminal-header {
+      background: var(--bg-surface);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .terminal-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .terminal-dot.r { background: #ff5f56; }
+    .terminal-dot.y { background: #ffbd2e; }
+    .terminal-dot.g { background: #27c93f; }
+    .terminal-title {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-left: 8px;
+    }
+    .terminal-body {
+      padding: 1.2rem 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--text);
+    }
+    .terminal-body .prompt { color: var(--accent); }
+    .terminal-body .comment { color: var(--text-muted); }
+    .terminal-body .cmd { color: var(--text); }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    footer .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    footer p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+    }
+    footer .footer-links {
+      margin-top: 1rem;
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+    }
+    footer .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      transition: color 0.2s;
+    }
+    footer .footer-links a:hover { color: var(--accent); }
+
+    /* STATUS PULSE */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .status-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+    }
+    .status-live .pulse-dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      nav ul { display: none; }
+      .arch-tier { flex-direction: column; align-items: center; }
+      .arch-node { min-width: auto; width: 100%; max-width: 320px; }
+      .comp-grid { grid-template-columns: 1fr; }
+      .dl-grid { grid-template-columns: 1fr; }
+      .community-grid { grid-template-columns: 1fr; }
+      section { padding: 3rem 1.2rem; }
+    }
+
+    /* DIVIDER */
+    .divider {
+      max-width: 1200px;
+      margin: 0 auto;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <img src="assets/Whim.png" alt="Whim">
+      whimgo<span class="dot">.io</span>
+    </a>
+    <ul>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#components">Components</a></li>
+      <li><a href="#start">Get Started</a></li>
+      <li><a href="#community">Community</a></li>
+      <li><a href="https://github.com/scarter84" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="hero-badge">Open Source &middot; Local-First &middot; Sovereign AI</span>
+  <h1>Build AI systems<br>that run on <span class="accent">your</span> hardware<span class="orange">.</span></h1>
+  <p class="tagline">
+    Whim is an open-source framework for sovereign, local-first AI &mdash;
+    from your desktop terminal to your vehicle dashboard.
+    No cloud dependencies. No data leaving your mesh. Your models, your rules.
+  </p>
+  <div class="hero-actions">
+    <a href="#start" class="btn btn-primary">Get Started</a>
+    <a href="#architecture" class="btn btn-secondary">See the Architecture</a>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="section-label">// system topology</div>
+  <h2 class="section-title">Architecture</h2>
+  <p class="section-desc">
+    A federated mesh of nodes &mdash; each capable of autonomous operation,
+    syncing when connected, independent when offline.
+  </p>
+
+  <div class="arch-diagram">
+    <div class="arch-nodes">
+
+      <!-- Tier 1: Operator -->
+      <div class="arch-label">OPERATOR</div>
+      <div class="arch-connector">|</div>
+
+      <!-- Tier 2: Command Center -->
+      <div class="arch-tier">
+        <div class="arch-node" style="border-color: var(--accent); min-width: 340px;">
+          <span class="node-icon">&#9641;</span>
+          <div class="node-name">Whim Terminal</div>
+          <div class="node-desc">
+            Desktop AI command center &middot; 18 tabs &middot; Tkinter<br>
+            LLM routing &middot; Voice engine &middot; APRS/HAM &middot; GeoF
+          </div>
+        </div>
+        <div class="arch-node">
+          <span class="node-icon">&#9881;</span>
+          <div class="node-name">OpenClaw Gateway</div>
+          <div class="node-desc">
+            JSON-RPC WebSocket &middot; :18789<br>
+            AI agent protocol layer
+          </div>
+        </div>
+        <div class="arch-node">
+          <span class="node-icon">&#9707;</span>
+          <div class="node-name">Ollama (Local LLMs)</div>
+          <div class="node-desc">
+            DeepSeek R1:32B &middot; Llama 3.1:8B<br>
+            Zero cloud inference
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-connector">&#8595; &nbsp; Tailscale Mesh + VPS Tunnel &nbsp; &#8595;</div>
+
+      <!-- Tier 3: Edge Nodes -->
+      <div class="arch-tier">
+        <div class="arch-node" style="border-color: var(--orange);">
+          <span class="node-icon">&#128241;</span>
+          <div class="node-name" style="color: var(--orange);">Whim.m</div>
+          <div class="node-desc">
+            Mobile companion &middot; Android APK<br>
+            5 tabs &middot; Recorder &middot; AI Chat
+          </div>
+        </div>
+        <div class="arch-node" style="border-color: var(--orange);">
+          <span class="node-icon">&#128663;</span>
+          <div class="node-name" style="color: var(--orange);">Whim.v</div>
+          <div class="node-desc">
+            Vehicle dash &middot; 13.6" head unit<br>
+            Local Qwen 1.5B &middot; Offline-capable
+          </div>
+        </div>
+        <div class="arch-node" style="border-color: var(--cyan);">
+          <span class="node-icon">&#128172;</span>
+          <div class="node-name" style="color: var(--cyan);">Enoch (Discord)</div>
+          <div class="node-desc">
+            OpenClaw bot persona<br>
+            MeritClaw progression &middot; XTTS voice
+          </div>
+        </div>
+      </div>
+
+      <div class="arch-connector">&#8595; &nbsp; Services Layer &nbsp; &#8595;</div>
+
+      <!-- Tier 4: Services -->
+      <div class="arch-tier">
+        <div class="arch-node">
+          <span class="node-icon">&#127908;</span>
+          <div class="node-name">Voice Engine</div>
+          <div class="node-desc">XTTS v2 &middot; Wake word &middot; VAD &middot; Whim-Scope</div>
+        </div>
+        <div class="arch-node">
+          <span class="node-icon">&#127760;</span>
+          <div class="node-name">GeoF</div>
+          <div class="node-desc">Geofencing &middot; APRS &middot; Location awareness</div>
+        </div>
+        <div class="arch-node">
+          <span class="node-icon">&#128225;</span>
+          <div class="node-name">HAM / Doppler</div>
+          <div class="node-desc">Radio telemetry &middot; Weather radar &middot; Station tracking</div>
+        </div>
+        <div class="arch-node">
+          <span class="node-icon">&#129302;</span>
+          <div class="node-name">WISP</div>
+          <div class="node-desc">Resident AI agent &middot; System ops &middot; Diagnostics</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="features-strip">
+    <div class="feature-item">
+      <h4>Federated Nodes</h4>
+      <p>Each device operates autonomously. Lose connection in a tunnel &mdash; the vehicle keeps running on its local model.</p>
+    </div>
+    <div class="feature-item">
+      <h4>Tailscale Mesh</h4>
+      <p>WireGuard-based direct connections with automatic NAT traversal. VPS tunnel fallback for anywhere-access.</p>
+    </div>
+    <div class="feature-item">
+      <h4>Zero Cloud Dependency</h4>
+      <p>All LLM inference runs on local hardware via Ollama. Your data never leaves your network.</p>
+    </div>
+    <div class="feature-item">
+      <h4>Modular Tabs</h4>
+      <p>Build your own stack. Enable only the tabs you need. Share community modules. Keep it lightweight.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- COMPONENTS -->
+<section id="components">
+  <div class="section-label">// component registry</div>
+  <h2 class="section-title">The Ecosystem</h2>
+  <p class="section-desc">
+    Every piece is independent, every piece connects. Pick what you need, ignore the rest.
+  </p>
+
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-header">
+        <span class="comp-dot"></span>
+        <span class="comp-name">Whim Terminal</span>
+        <span class="comp-tag">Desktop</span>
+      </div>
+      <p>The command center. An 18-tab Tkinter application with LLM model routing, voice engine, APRS/HAM radio, geofencing, audio capture, device management, and a full settings panel. Cross-platform: Linux, macOS, Windows.</p>
+    </div>
+
+    <div class="comp-card">
+      <div class="comp-header">
+        <span class="comp-dot orange"></span>
+        <span class="comp-name">Whim.m</span>
+        <span class="comp-tag">Mobile</span>
+      </div>
+      <p>Android companion app served as a 5-tab WebView. Voice recording, file library, AI chat, wake word detection, and cross-device messaging. Connects via VPS tunnel or Tailscale with auto-reconnect.</p>
+    </div>
+
+    <div class="comp-card">
+      <div class="comp-header">
+        <span class="comp-dot orange"></span>
+        <span class="comp-name">Whim.v</span>
+        <span class="comp-tag">Vehicle</span>
+      </div>
+      <p>Vehicle dashboard interface for a 13.6" Android head unit. Runs a local Qwen 1.5B model for offline autonomy. Handles OpenClaw commands, telemetry, and priority-based task delegation.</p>
+    </div>
+
+    <div class="comp-card">
+      <div class="comp-header">
+        <span class="comp-dot"></span>
+        <span class="comp-name">OpenClaw</span>
+        <span class="comp-tag">Protocol</span>
+      </div>
+      <p>The AI gateway protocol. JSON-RPC over WebSocket connecting the terminal to Ollama inference. Supports model switching, context injection, and multi-model routing (DeepSeek for logic, Llama for creative, Qwen for tools).</p>
+    </div>
+
+    <div class="comp-card">
+      <div class="comp-header">
+        <span class="comp-dot cyan"></span>
+        <span class="comp-name">Voice Engine</span>
+        <span class="comp-tag">Audio</span>
+      </div>
+      <p>Full audio pipeline: XTTS v2 text-to-speech with persona voice clones, wake word detection (openWakeWord / Porcupine), live spectrogram (Whim-Scope), gain/HPF/AGC/EQ tuning for noisy environments.</p>
+    </div>
+
+    <div class="comp-card">
+      <div class="comp-header">
+        <span class="comp-dot cyan"></span>
+        <span class="comp-name">GeoF</span>
+        <span class="comp-tag">Location</span>
+      </div>
+      <p>Geofencing and location awareness engine. Integrates with APRS packet radio for station tracking, supports custom geofence zones with trigger actions and notifications.</p>
+    </div>
+
+    <div class="comp-card">
+      <div class="comp-header">
+        <span class="comp-dot cyan"></span>
+        <span class="comp-name">HAM / Doppler</span>
+        <span class="comp-tag">Telemetry</span>
+      </div>
+      <p>Amateur radio integration with Doppler weather radar overlay. APRS raw packet decoding, station list, signal activity visualization, and weather intelligence.</p>
+    </div>
+
+    <div class="comp-card">
+      <div class="comp-header">
+        <span class="comp-dot"></span>
+        <span class="comp-name">WISP</span>
+        <span class="comp-tag">Agent</span>
+      </div>
+      <p>Whim's Integrated Systems Processor. The resident AI agent for system operations, diagnostics, vault browsing, and automated task execution across the mesh.</p>
+    </div>
+
+    <div class="comp-card">
+      <div class="comp-header">
+        <span class="comp-dot red"></span>
+        <span class="comp-name">Enoch / OpenClaw Bot</span>
+        <span class="comp-tag">Discord</span>
+      </div>
+      <p>Discord bot with the MeritClaw progression system. 10 badge tiers that unlock real capabilities: memory vaults, parallel tool execution, voice synthesis, image generation, and proactive assistance.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- GET STARTED -->
+<section id="start">
+  <div class="section-label">// quickstart</div>
+  <h2 class="section-title">Get Started</h2>
+  <p class="section-desc">
+    Clone it. Configure it. Run it. No accounts, no cloud keys, no telemetry.
+  </p>
+
+  <div class="terminal-block">
+    <div class="terminal-header">
+      <span class="terminal-dot r"></span>
+      <span class="terminal-dot y"></span>
+      <span class="terminal-dot g"></span>
+      <span class="terminal-title">whim-terminal &mdash; bash</span>
+    </div>
+    <div class="terminal-body">
+      <span class="comment"># Clone the repository</span><br>
+      <span class="prompt">$</span> <span class="cmd">git clone https://github.com/scarter84/whim-terminal.git</span><br>
+      <span class="prompt">$</span> <span class="cmd">cd whim-terminal</span><br><br>
+      <span class="comment"># Set up the environment</span><br>
+      <span class="prompt">$</span> <span class="cmd">python3 -m venv venv</span><br>
+      <span class="prompt">$</span> <span class="cmd">venv/bin/pip install -r requirements.txt</span><br><br>
+      <span class="comment"># Install Ollama (local LLM inference)</span><br>
+      <span class="prompt">$</span> <span class="cmd">curl -fsSL https://ollama.ai/install.sh | sh</span><br>
+      <span class="prompt">$</span> <span class="cmd">ollama pull deepseek-r1:32b</span><br><br>
+      <span class="comment"># Launch</span><br>
+      <span class="prompt">$</span> <span class="cmd">venv/bin/python openclaw_tkui.py</span><br>
+    </div>
+  </div>
+
+  <div class="dl-grid">
+    <div class="dl-card">
+      <div class="dl-icon">&#9641;</div>
+      <h3>Whim Terminal</h3>
+      <p>Desktop command center<br>Linux &middot; macOS &middot; Windows</p>
+      <a href="https://github.com/scarter84/whim-terminal" target="_blank" class="btn btn-secondary">View on GitHub</a>
+    </div>
+    <div class="dl-card">
+      <div class="dl-icon">&#128241;</div>
+      <h3>Whim.m</h3>
+      <p>Mobile companion APK<br>Android 10+</p>
+      <a href="https://github.com/scarter84/whim-terminal/releases" target="_blank" class="btn btn-secondary">Download APK</a>
+    </div>
+    <div class="dl-card">
+      <div class="dl-icon">&#128663;</div>
+      <h3>Whim.v</h3>
+      <p>Vehicle dash interface<br>Android head units</p>
+      <a href="https://github.com/scarter84/whim-terminal/releases" target="_blank" class="btn btn-secondary">Coming Soon</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- COMMUNITY -->
+<section id="community">
+  <div class="section-label">// community ingest</div>
+  <h2 class="section-title">Build With Us</h2>
+  <p class="section-desc">
+    Whim is built for creators and developers who believe AI should run on hardware you own.
+    Friction-free. Open source. Pushing AI forward together.
+  </p>
+
+  <div class="community-grid">
+    <div class="community-card">
+      <h3>&#128736; Contribute a Module</h3>
+      <p>The tab system is modular by design. Write a new tab, drop it in, share it with the community. GeoF, HAM, Doppler &mdash; they all started as standalone modules. Yours can too.</p>
+    </div>
+    <div class="community-card">
+      <h3>&#128172; Join the Discord</h3>
+      <p>Talk to Enoch (our OpenClaw bot), share your builds, get help with configuration. The community runs on the same sovereign principles as the software.</p>
+    </div>
+    <div class="community-card">
+      <h3>&#128214; Read the Manual</h3>
+      <p>Full system documentation covering architecture, networking topology, voice engine tuning, and deployment guides for every platform.</p>
+    </div>
+    <div class="community-card">
+      <h3>&#127793; Open Source Philosophy</h3>
+      <p>No gated features. No premium tiers. No data collection. AI should evolve alongside the people building with it &mdash; not behind a paywall.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <p>
+      <span class="status-live"><span class="pulse-dot"></span> whimgo.io</span>
+      &nbsp;&middot;&nbsp; Built sovereign &nbsp;&middot;&nbsp; MIT License
+    </p>
+    <div class="footer-links">
+      <a href="https://github.com/scarter84" target="_blank">GitHub</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#components">Components</a>
+      <a href="#start">Downloads</a>
+      <a href="#community">Community</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
