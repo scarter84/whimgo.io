@@ -1112,7 +1112,7 @@ function matchGPU() {
 }
 
 // Operator login
-const OP_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
+const OP_HASH = '96a80101f4f3e7d36be92b931813ad9f779a1a9851491cc9861d14a0adeb3f07';
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
