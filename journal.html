@@ -107,6 +107,26 @@
     footer { border-top: 1px solid var(--border); padding: 40px 32px; text-align: center; }
     footer p { color: var(--text-muted); font-size: 0.8rem; font-family: var(--mono); }
 
+    .auth-gate {
+      position: fixed; inset: 0; z-index: 300;
+      background: var(--bg); display: flex; justify-content: center; align-items: center;
+    }
+    .auth-gate.hidden { display: none; }
+    .auth-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 32px; width: 340px; text-align: center;
+    }
+    .auth-box h3 { font-family: var(--mono); color: var(--accent); margin-bottom: 16px; font-size: 1rem; }
+    .auth-box input {
+      width: 100%; padding: 10px 14px; margin-bottom: 12px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: var(--mono); font-size: 0.85rem;
+    }
+    .auth-box input:focus { outline: none; border-color: var(--accent); }
+    .auth-box .auth-err {
+      color: var(--red); font-family: var(--mono); font-size: 0.75rem; margin-top: 8px; display: none;
+    }
+
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .wrap { padding: 0 16px; }
@@ -115,6 +135,16 @@
   </style>
 </head>
 <body>
+
+<!-- AUTH GATE -->
+<div class="auth-gate" id="auth-gate">
+  <div class="auth-box">
+    <h3>Operator Access Required</h3>
+    <input type="password" id="gate-pass" placeholder="passphrase" onkeydown="if(event.key==='Enter')gateLogin()">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="gateLogin()">Authenticate</button>
+    <div class="auth-err" id="gate-err">Invalid passphrase</div>
+  </div>
+</div>
 
 <nav>
   <div class="nav-inner">
@@ -245,6 +275,27 @@
 </footer>
 
 <script>
+const OP_HASH = '96a80101f4f3e7d36be92b931813ad9f779a1a9851491cc9861d14a0adeb3f07';
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function gateLogin() {
+  const pass = document.getElementById('gate-pass').value;
+  const hash = await sha256(pass);
+  if (hash === OP_HASH) {
+    sessionStorage.setItem('op_auth', '1');
+    document.getElementById('auth-gate').classList.add('hidden');
+  } else {
+    document.getElementById('gate-err').style.display = 'block';
+  }
+}
+if (sessionStorage.getItem('op_auth') === '1') {
+  document.getElementById('auth-gate').classList.add('hidden');
+} else {
+  document.getElementById('gate-pass').focus();
+}
+
 const STORAGE_KEY = 'whim_journal_entries';
 
 function loadEntries() {
