@@ -293,6 +293,127 @@
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
     .pulse-dot { width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s ease-in-out infinite;display:inline-block; }
 
+    /* EDGE MATCH */
+    .edge-select-wrap {
+      display: flex; align-items: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+    }
+    .edge-select-wrap label {
+      font-family: var(--mono); font-size: 0.85rem; color: var(--text-dim);
+    }
+    #gpu-select {
+      font-family: var(--mono); font-size: 0.82rem;
+      background: var(--bg-card); color: var(--text); border: 1px solid var(--border);
+      padding: 8px 14px; border-radius: 6px; min-width: 260px; cursor: pointer;
+    }
+    #gpu-select:focus { outline: none; border-color: var(--accent); }
+    #gpu-select option { background: var(--bg-card); color: var(--text); }
+    .edge-result {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 20px 24px; margin-bottom: 24px; display: none;
+    }
+    .edge-result.active { display: block; border-color: var(--accent); }
+    .edge-result .er-tier {
+      font-family: var(--mono); font-weight: 700; font-size: 1rem; color: var(--accent); margin-bottom: 6px;
+    }
+    .edge-result .er-models { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 8px; }
+    .edge-result .er-perf {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--orange); 
+    }
+    .edge-result .er-note {
+      font-size: 0.78rem; color: var(--text-muted); margin-top: 8px; font-style: italic;
+    }
+    .edge-table { margin-top: 16px; }
+    .edge-table tr.edge-highlight td { background: rgba(0,255,0,0.06); border-color: var(--accent); }
+    .vram-note {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--text-muted);
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 16px; margin-top: 16px;
+    }
+    .vram-note strong { color: var(--orange); }
+
+    /* OPERATOR LOGIN + DASHBOARD */
+    .nav-login {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--text-muted);
+      background: transparent; border: 1px solid var(--border); padding: 4px 12px;
+      border-radius: 4px; cursor: pointer; transition: all 0.2s; margin-left: 8px;
+    }
+    .nav-login:hover { border-color: var(--orange); color: var(--orange); }
+    .nav-login.active { border-color: var(--accent); color: var(--accent); }
+    .login-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+      justify-content: center; align-items: center;
+    }
+    .login-overlay.show { display: flex; }
+    .login-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 32px; width: 340px; text-align: center;
+    }
+    .login-box h3 {
+      font-family: var(--mono); color: var(--accent); margin-bottom: 16px; font-size: 1rem;
+    }
+    .login-box input {
+      width: 100%; padding: 10px 14px; margin-bottom: 12px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: var(--mono); font-size: 0.85rem;
+    }
+    .login-box input:focus { outline: none; border-color: var(--accent); }
+    .login-box .btn { width: 100%; justify-content: center; margin-top: 4px; }
+    .login-box .login-err {
+      color: var(--red); font-family: var(--mono); font-size: 0.75rem;
+      margin-top: 8px; display: none;
+    }
+    .operator-dash {
+      display: none; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px; margin-bottom: 32px;
+    }
+    .operator-dash.show { display: block; }
+    .operator-dash h3 {
+      font-family: var(--mono); color: var(--orange); font-size: 0.95rem; margin-bottom: 16px;
+    }
+    .dash-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
+      margin-bottom: 16px;
+    }
+    .dash-card {
+      background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px;
+    }
+    .dash-card .dc-label {
+      font-family: var(--mono); font-size: 0.7rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;
+    }
+    .dash-card .dc-value {
+      font-family: var(--mono); font-size: 0.85rem; color: var(--text);
+    }
+    .dash-card .dc-status {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 0.8rem;
+    }
+    .dash-card .dc-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .dash-card .dc-dot.online { background: var(--accent); }
+    .dash-card .dc-dot.offline { background: var(--red); }
+    .dash-card .dc-dot.dev { background: var(--yellow); }
+    .dash-tasks {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px;
+    }
+    .dash-tasks h4 {
+      font-family: var(--mono); font-size: 0.8rem; color: var(--cyan); margin-bottom: 10px;
+    }
+    .dash-tasks ul { list-style: none; }
+    .dash-tasks li {
+      font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim);
+      padding: 4px 0; border-bottom: 1px solid var(--border);
+    }
+    .dash-tasks li:last-child { border-bottom: none; }
+    .dash-tasks .task-tag {
+      font-size: 0.65rem; padding: 1px 6px; border-radius: 3px; margin-right: 6px;
+    }
+    .dash-tasks .task-tag.pending { background: var(--yellow); color: #000; }
+    .dash-tasks .task-tag.inprog { background: var(--cyan); color: #000; }
+    .dash-tasks .task-tag.blocked { background: var(--red); color: #fff; }
+
     /* RESPONSIVE */
     @media (max-width: 768px) {
       .nav-links { display: none; }
@@ -315,6 +436,16 @@
 </head>
 <body>
 
+<!-- LOGIN OVERLAY -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <h3>Operator Handshake</h3>
+    <input type="password" id="op-pass" placeholder="passphrase" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-primary" onclick="doLogin()">Authenticate</button>
+    <div class="login-err" id="login-err">Invalid passphrase</div>
+  </div>
+</div>
+
 <nav>
   <div class="nav-inner">
     <a href="#" class="nav-logo">
@@ -324,12 +455,16 @@
     <ul class="nav-links">
       <li><a href="#what">About</a></li>
       <li><a href="#features">Features</a></li>
+      <li><a href="#edge">Edge Match</a></li>
       <li><a href="#arch">Architecture</a></li>
       <li><a href="#start">Get Started</a></li>
-      <li><a href="#community">Community</a></li>
+      <li><a href="journal.html">Journal</a></li>
       <li><a href="https://github.com/scarter84" target="_blank">GitHub</a></li>
     </ul>
-    <span class="nav-version">v0.3.4</span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="nav-version">v0.3.4</span>
+      <button class="nav-login" id="nav-login-btn" onclick="toggleLogin()">Operator</button>
+    </div>
   </div>
 </nav>
 
@@ -661,6 +796,117 @@
 
 <hr class="div">
 
+<!-- EDGE MATCH -->
+<section id="edge">
+  <div class="wrap">
+    <div class="sec-label">// edge match</div>
+    <h2 class="sec-title">Hardware &amp; Model Matching</h2>
+    <p class="sec-desc">Local AI runs on your GPU. Select your hardware and we'll tell you which models fit.</p>
+
+    <div class="edge-select-wrap">
+      <label for="gpu-select">Your GPU:</label>
+      <select id="gpu-select" onchange="matchGPU()">
+        <option value="">-- Select your hardware --</option>
+        <optgroup label="NVIDIA">
+          <option value="4gb">GTX 1650 / MX series (4GB)</option>
+          <option value="6gb">RTX 3060 6GB / GTX 1660</option>
+          <option value="8gb">RTX 3060 Ti / 3070 / 4060 (8GB)</option>
+          <option value="12gb">RTX 3060 12GB / 4070 / 4070 Ti</option>
+          <option value="16gb">RTX 4080 / 5070 Ti (16GB)</option>
+          <option value="24gb">RTX 3090 / 4090 / 5090 (24GB)</option>
+          <option value="48gb">Dual GPU / 48GB+</option>
+        </optgroup>
+        <optgroup label="Apple Silicon">
+          <option value="8gb">M1 / M2 / M3 (8GB unified)</option>
+          <option value="16gb">M1 Pro / M2 Pro / M3 Pro (16GB)</option>
+          <option value="24gb">M1 Max / M2 Max / M3 Max (24-36GB)</option>
+          <option value="48gb">M1/M2/M3 Ultra (48-192GB)</option>
+        </optgroup>
+        <optgroup label="Other">
+          <option value="2gb">Integrated / iGPU / Raspberry Pi</option>
+          <option value="4gb">Steam Deck / 8GB system RAM (no dGPU)</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <div class="edge-result" id="edge-result">
+      <div class="er-tier" id="er-tier"></div>
+      <div class="er-models" id="er-models"></div>
+      <div class="er-perf" id="er-perf"></div>
+      <div class="er-note" id="er-note"></div>
+    </div>
+
+    <table class="edge-table" id="edge-table">
+      <thead>
+        <tr>
+          <th>Tier</th>
+          <th>Parameters</th>
+          <th>VRAM (Q4/Q8)</th>
+          <th>Suggested Hardware</th>
+          <th>Whim Performance</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr data-tier="edge">
+          <td><strong>Edge / Mobile</strong></td>
+          <td>1B - 3B</td>
+          <td>2 - 4 GB</td>
+          <td>iGPU / Steam Deck / RPi / 8GB RAM</td>
+          <td>Near-instant response</td>
+        </tr>
+        <tr data-tier="standard">
+          <td><strong>Standard</strong></td>
+          <td>7B - 9B</td>
+          <td>6 - 10 GB</td>
+          <td>RTX 3060 / 4060 / M1-M3 Mac</td>
+          <td>Snappy (30+ t/s)</td>
+        </tr>
+        <tr data-tier="pro">
+          <td><strong>Pro / Coding</strong></td>
+          <td>12B - 14B</td>
+          <td>12 - 16 GB</td>
+          <td>RTX 4070 / 3080 / M-Pro</td>
+          <td>Thoughtful reasoning</td>
+        </tr>
+        <tr data-tier="research">
+          <td><strong>Research</strong></td>
+          <td>30B - 35B</td>
+          <td>20 - 24 GB</td>
+          <td>RTX 3090 / 4090 / 5090 / M-Max</td>
+          <td>Deep analysis</td>
+        </tr>
+        <tr data-tier="sovereign">
+          <td><strong>Sovereign</strong></td>
+          <td>70B+</td>
+          <td>40 GB+</td>
+          <td>Dual 3090s / M-Ultra</td>
+          <td>Human-level complexity</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="vram-note">
+      <strong>VRAM Tax:</strong> Your OS, browser, and desktop compositor consume 1-2 GB of VRAM.
+      An 8 GB card effectively has ~6.5 GB available for model inference. Plan accordingly.
+    </div>
+
+    <div class="term" style="margin-top: 24px;">
+      <div class="term-head">
+        <span class="term-dot r"></span><span class="term-dot y"></span><span class="term-dot g"></span>
+        <span class="term-title">auto-detect (coming soon)</span>
+      </div>
+      <div class="term-body">
+        <span class="c"># Let Whim probe your hardware and pull the optimal model</span><br>
+        <span class="p">$</span> whim init --match<br>
+        <span class="c"># Detected: RTX 4070 12GB -- Tier: Pro/Coding</span><br>
+        <span class="c"># Pulling: deepseek-r1:14b-q4_K_M ...</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="div">
+
 <!-- GET STARTED -->
 <section id="start">
   <div class="wrap">
@@ -760,6 +1006,61 @@
   </div>
 </section>
 
+<!-- OPERATOR DASHBOARD (hidden until login) -->
+<section id="operator" style="display:none;">
+  <div class="wrap">
+    <div class="operator-dash show">
+      <h3>Operator Dashboard</h3>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <div class="dc-label">Tailscale Mesh</div>
+          <div class="dc-status"><span class="dc-dot online"></span> CARRAMint (100.69.17.20)</div><br>
+          <div class="dc-status"><span class="dc-dot online"></span> Galaxy S22 (100.77.59.2)</div><br>
+          <div class="dc-status"><span class="dc-dot online"></span> Galaxy S9 (100.97.96.1)</div><br>
+          <div class="dc-status"><span class="dc-dot online"></span> Lenovo Tablet (100.64.255.124)</div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-label">VPS Tunnel</div>
+          <div class="dc-status"><span class="dc-dot online"></span> SSH Reverse Tunnel :8089</div><br>
+          <div class="dc-value" style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Whim.m cross-network relay active</div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-label">OpenClaw Gateway</div>
+          <div class="dc-status"><span class="dc-dot online"></span> WebSocket :18789</div><br>
+          <div class="dc-value" style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">Ollama / DeepSeek R1:32B loaded</div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-label">Vehicle Dash (Whim.v)</div>
+          <div class="dc-status"><span class="dc-dot dev"></span> 4G Status: In Development</div><br>
+          <div class="dc-value" style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">13.6" head unit / Qwen 1.5B offline</div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-label">Sideload Drive</div>
+          <div class="dc-value">ONN 500GB USB -- connected to head unit</div>
+        </div>
+        <div class="dash-card">
+          <div class="dc-label">Services</div>
+          <div class="dc-status"><span class="dc-dot online"></span> XTTS v2</div><br>
+          <div class="dc-status"><span class="dc-dot online"></span> Journal Ingest :8088</div><br>
+          <div class="dc-status"><span class="dc-dot online"></span> Screen Share :8091</div><br>
+          <div class="dc-status"><span class="dc-dot online"></span> Signal CLI :8080</div>
+        </div>
+      </div>
+      <div class="dash-tasks">
+        <h4>Burndown Queue</h4>
+        <ul>
+          <li><span class="task-tag pending">PENDING</span> Load 2 APKs to vehicle head unit (Whim.m + Whim.v)</li>
+          <li><span class="task-tag pending">PENDING</span> Install Whim Terminal (lite) on Lenovo Tablet</li>
+          <li><span class="task-tag inprog">IN PROG</span> Push files via driveway WiFi to phones/tablets</li>
+          <li><span class="task-tag inprog">IN PROG</span> Vehicle 4G connectivity -- antenna + SIM provisioning</li>
+          <li><span class="task-tag blocked">BLOCKED</span> USB sideload from ONN drive to head unit -- needs ADB bridge</li>
+          <li><span class="task-tag pending">PENDING</span> Whim.v offline model cache -- preload Qwen 1.5B to local storage</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <footer>
   <p>
     <span class="pulse-dot"></span>&nbsp; whimgo.io &nbsp;/&nbsp; MIT License &nbsp;/&nbsp; Built sovereign
@@ -769,7 +1070,9 @@
     <a href="#what">About</a>
     <a href="#features">Features</a>
     <a href="#arch">Architecture</a>
+    <a href="#edge">Edge Match</a>
     <a href="#start">Downloads</a>
+    <a href="journal.html">Journal</a>
     <a href="#community">Community</a>
   </div>
 </footer>
@@ -780,6 +1083,73 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   });
 }
+
+// Edge Match GPU selector
+const gpuMap = {
+  '2gb':  { tier: 'Edge / Mobile', models: 'Qwen2 0.5B, TinyLlama 1.1B, Phi-3 Mini (Q4)', perf: 'Near-instant -- great for Whim.v vehicle dash', note: 'Ideal for Raspberry Pi, embedded, or offline vehicle use.', highlight: 'edge' },
+  '4gb':  { tier: 'Edge / Mobile', models: 'Phi-3 3.8B (Q4), Gemma 2B, Qwen2 1.5B', perf: 'Fast chat, basic tool use', note: 'Steam Deck and iGPU territory. Runs well with quantized small models.', highlight: 'edge' },
+  '6gb':  { tier: 'Standard', models: 'Llama 3.1:8B (Q4), Mistral 7B (Q4), Gemma 7B', perf: 'Snappy -- 30+ tokens/sec', note: 'Solid general-purpose tier. Handles Whim chat and voice pipeline.', highlight: 'standard' },
+  '8gb':  { tier: 'Standard', models: 'Llama 3.1:8B (Q8), Mistral 7B (Q8), CodeGemma 7B', perf: 'Snappy -- 25-35 tokens/sec', note: 'Sweet spot for 8GB cards and Apple M1/M2/M3 base models.', highlight: 'standard' },
+  '12gb': { tier: 'Pro / Coding', models: 'DeepSeek R1:14B (Q4), CodeLlama 13B, Llama 3.1:8B (Q8) + XTTS', perf: 'Thoughtful reasoning -- your Z790/4070 tier', note: 'This is the Whim development rig sweet spot. Run inference + voice simultaneously.', highlight: 'pro' },
+  '16gb': { tier: 'Pro / Coding', models: 'DeepSeek R1:14B (Q8), Mixtral 8x7B (Q4), WizardCoder 15B', perf: 'Strong reasoning + code generation', note: 'Headroom for larger quantizations and multi-service operation.', highlight: 'pro' },
+  '24gb': { tier: 'Research', models: 'DeepSeek R1:32B (Q4), Llama 3.1:70B (Q2), Mixtral 8x7B (Q8)', perf: 'Deep analysis -- 10-20 tokens/sec on 32B', note: 'The 3090/4090 class. Full DeepSeek R1:32B at good quality.', highlight: 'research' },
+  '48gb': { tier: 'Sovereign', models: 'Llama 3.1:70B (Q4-Q8), DeepSeek R1:70B, Command-R+ 104B (Q2)', perf: 'Human-level complexity', note: 'Dual GPU or M-Ultra territory. No cloud needed, ever.', highlight: 'sovereign' }
+};
+
+function matchGPU() {
+  const val = document.getElementById('gpu-select').value;
+  const box = document.getElementById('edge-result');
+  const rows = document.querySelectorAll('#edge-table tbody tr');
+  rows.forEach(r => r.classList.remove('edge-highlight'));
+  if (!val || !gpuMap[val]) { box.classList.remove('active'); return; }
+  const m = gpuMap[val];
+  document.getElementById('er-tier').textContent = 'Tier: ' + m.tier;
+  document.getElementById('er-models').textContent = 'Recommended: ' + m.models;
+  document.getElementById('er-perf').textContent = m.perf;
+  document.getElementById('er-note').textContent = m.note;
+  box.classList.add('active');
+  rows.forEach(r => { if (r.dataset.tier === m.highlight) r.classList.add('edge-highlight'); });
+}
+
+// Operator login
+const OP_HASH = '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8';
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+function toggleLogin() {
+  if (sessionStorage.getItem('op_auth') === '1') { logoutOp(); return; }
+  document.getElementById('login-overlay').classList.add('show');
+  document.getElementById('op-pass').focus();
+}
+async function doLogin() {
+  const pass = document.getElementById('op-pass').value;
+  const hash = await sha256(pass);
+  if (hash === OP_HASH) {
+    sessionStorage.setItem('op_auth', '1');
+    document.getElementById('login-overlay').classList.remove('show');
+    document.getElementById('op-pass').value = '';
+    document.getElementById('login-err').style.display = 'none';
+    showDash();
+  } else {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+function showDash() {
+  document.getElementById('operator').style.display = '';
+  document.getElementById('nav-login-btn').classList.add('active');
+  document.getElementById('nav-login-btn').textContent = 'Operator (on)';
+}
+function logoutOp() {
+  sessionStorage.removeItem('op_auth');
+  document.getElementById('operator').style.display = 'none';
+  document.getElementById('nav-login-btn').classList.remove('active');
+  document.getElementById('nav-login-btn').textContent = 'Operator';
+}
+document.getElementById('login-overlay').addEventListener('click', function(e) {
+  if (e.target === this) { this.classList.remove('show'); }
+});
+if (sessionStorage.getItem('op_auth') === '1') showDash();
 </script>
 </body>
 </html>

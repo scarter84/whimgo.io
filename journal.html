@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whim — Developer Journal</title>
+  <meta name="description" content="Whim development journal and burndown log. Track builds, device status, and project milestones.">
+  <link rel="icon" type="image/png" href="assets/fire.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0e0e0e; --bg-card: #1a1a1a; --bg-elevated: #222222; --bg-surface: #2b2b2b;
+      --accent: #00ff00; --accent-dim: #2fa572; --accent-glow: rgba(0,255,0,0.12);
+      --orange: #e08030; --orange-glow: rgba(224,128,48,0.12);
+      --cyan: #00e5ff; --blue: #1e6ea1; --red: #d94040; --yellow: #e0a030;
+      --text: #dce4ee; --text-dim: #888888; --text-muted: #555555;
+      --border: #2a2a2a; --border-hi: #3a3a3a;
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+      --sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.7; font-size: 15px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ::selection { background: var(--blue); color: #fff; }
+
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(14,14,14,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto; display: flex; align-items: center;
+      justify-content: space-between; height: 54px; padding: 0 32px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px; text-decoration: none;
+      color: var(--text); font-family: var(--mono); font-weight: 700; font-size: 1rem;
+    }
+    .nav-logo img { height: 24px; width: 24px; }
+    .nav-logo .g { color: var(--accent); }
+    .nav-links { list-style: none; display: flex; gap: 1.5rem; }
+    .nav-links a { color: var(--text-dim); font-family: var(--mono); font-size: 0.8rem; text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent); text-decoration: none; }
+    .nav-links a.active { color: var(--accent); }
+
+    .wrap { max-width: 900px; margin: 0 auto; padding: 0 32px; }
+    .page-header { padding: 100px 0 40px; }
+    .sec-label { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 6px; }
+    .sec-title { font-size: 2rem; font-weight: 700; margin-bottom: 6px; }
+    .sec-desc { color: var(--text-dim); font-size: 1rem; margin-bottom: 32px; }
+    hr.div { border: none; border-top: 1px solid var(--border); margin: 0; }
+
+    .journal-entry {
+      border-left: 2px solid var(--border); padding: 20px 0 20px 24px; margin: 0;
+      position: relative;
+    }
+    .journal-entry::before {
+      content: ''; position: absolute; left: -5px; top: 26px;
+      width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg);
+    }
+    .journal-entry.orange::before { background: var(--orange); }
+    .journal-entry.cyan::before { background: var(--cyan); }
+    .journal-entry.yellow::before { background: var(--yellow); }
+    .journal-entry.red::before { background: var(--red); }
+    .je-date { font-family: var(--mono); font-size: 0.72rem; color: var(--text-muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+    .je-title { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .je-body { font-size: 0.88rem; color: var(--text-dim); line-height: 1.7; }
+    .je-body ul { margin: 8px 0 8px 20px; }
+    .je-body li { margin-bottom: 4px; }
+    .je-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+    .je-tag {
+      font-family: var(--mono); font-size: 0.65rem; padding: 2px 8px; border-radius: 4px;
+      border: 1px solid var(--border); color: var(--text-muted);
+    }
+    .je-tag.device { border-color: var(--cyan); color: var(--cyan); }
+    .je-tag.build { border-color: var(--accent); color: var(--accent); }
+    .je-tag.infra { border-color: var(--orange); color: var(--orange); }
+    .je-tag.blocked { border-color: var(--red); color: var(--red); }
+
+    .new-entry-form {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 24px; margin: 32px 0;
+    }
+    .new-entry-form h3 { font-family: var(--mono); font-size: 0.9rem; color: var(--accent); margin-bottom: 16px; }
+    .new-entry-form input, .new-entry-form textarea, .new-entry-form select {
+      width: 100%; padding: 10px 14px; margin-bottom: 12px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: var(--mono); font-size: 0.85rem; resize: vertical;
+    }
+    .new-entry-form input:focus, .new-entry-form textarea:focus { outline: none; border-color: var(--accent); }
+    .new-entry-form textarea { min-height: 100px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px; border-radius: 6px; font-family: var(--mono); font-size: 0.85rem;
+      text-decoration: none; transition: all 0.2s; border: none; cursor: pointer;
+    }
+    .btn-primary { background: var(--accent); color: #000; font-weight: 700; }
+    .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-small { padding: 6px 14px; font-size: 0.75rem; }
+
+    footer { border-top: 1px solid var(--border); padding: 40px 32px; text-align: center; }
+    footer p { color: var(--text-muted); font-size: 0.8rem; font-family: var(--mono); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .wrap { padding: 0 16px; }
+      .journal-entry { padding-left: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="assets/fire.png" alt="Whim">
+      whim<span class="g">go</span>.io
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html#what">About</a></li>
+      <li><a href="index.html#features">Features</a></li>
+      <li><a href="index.html#edge">Edge Match</a></li>
+      <li><a href="index.html#arch">Architecture</a></li>
+      <li><a href="journal.html" class="active">Journal</a></li>
+      <li><a href="https://github.com/scarter84" target="_blank">GitHub</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="page-header">
+    <div class="sec-label">// developer journal</div>
+    <h1 class="sec-title">Build Log</h1>
+    <p class="sec-desc">Burndown notes, device status, deployment tasks, and development milestones for the Whim ecosystem.</p>
+  </div>
+
+  <!-- NEW ENTRY FORM (localStorage-backed) -->
+  <div class="new-entry-form" id="entry-form">
+    <h3>+ New Entry</h3>
+    <input type="text" id="je-new-title" placeholder="Entry title">
+    <textarea id="je-new-body" placeholder="What happened? What's next? Paste notes, device status, blockers..."></textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <label style="font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);display:flex;align-items:center;gap:4px;">
+        <input type="checkbox" class="je-tag-check" value="build"> build
+      </label>
+      <label style="font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);display:flex;align-items:center;gap:4px;">
+        <input type="checkbox" class="je-tag-check" value="device"> device
+      </label>
+      <label style="font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);display:flex;align-items:center;gap:4px;">
+        <input type="checkbox" class="je-tag-check" value="infra"> infra
+      </label>
+      <label style="font-family:var(--mono);font-size:0.75rem;color:var(--text-dim);display:flex;align-items:center;gap:4px;">
+        <input type="checkbox" class="je-tag-check" value="blocked"> blocked
+      </label>
+    </div>
+    <button class="btn btn-primary" onclick="addEntry()">Log Entry</button>
+  </div>
+
+  <div id="journal-entries">
+    <!-- Dynamic entries load here, then static seed entries below -->
+  </div>
+
+  <!-- SEED ENTRIES -->
+  <div id="seed-entries">
+    <div class="journal-entry">
+      <div class="je-date">2026-05-03</div>
+      <div class="je-title">whimgo.io is live</div>
+      <div class="je-body">
+        Domain verified with GitHub Pages. SSL cert issued. DNS propagated -- all 4 A records and CNAME for www resolving correctly through GoDaddy.
+        <ul>
+          <li>Site live at whimgo.io with full PWA support</li>
+          <li>Added Edge Match hardware table for GPU/model pairing</li>
+          <li>Operator dashboard behind login for ecosystem monitoring</li>
+        </ul>
+      </div>
+      <div class="je-tags">
+        <span class="je-tag build">build</span>
+        <span class="je-tag infra">infra</span>
+      </div>
+    </div>
+
+    <div class="journal-entry orange">
+      <div class="je-date">2026-05-03</div>
+      <div class="je-title">Vehicle head unit -- APK sideload queue</div>
+      <div class="je-body">
+        13.6" Android head unit needs Whim.m and Whim.v APKs loaded. Currently using ONN 500GB USB drive connected to the unit. ADB bridge needed for clean sideload.
+        <ul>
+          <li>2 APKs pending: Whim.m (companion) + Whim.v (vehicle dash)</li>
+          <li>4G connectivity in development -- antenna + SIM not yet provisioned</li>
+          <li>Driveway WiFi range is the current push channel for phones/tablets</li>
+        </ul>
+      </div>
+      <div class="je-tags">
+        <span class="je-tag device">device</span>
+        <span class="je-tag blocked">blocked</span>
+      </div>
+    </div>
+
+    <div class="journal-entry cyan">
+      <div class="je-date">2026-05-03</div>
+      <div class="je-title">Device fleet status</div>
+      <div class="je-body">
+        <ul>
+          <li><strong>PC (CARRAMint):</strong> Hub online. Ollama running DeepSeek R1:32B. All services nominal.</li>
+          <li><strong>Galaxy S22:</strong> Primary mobile. Whim.m installed. Tailscale connected.</li>
+          <li><strong>Galaxy S9:</strong> Secondary mobile. Needs Whim.m update via driveway WiFi push.</li>
+          <li><strong>Lenovo Tablet:</strong> Consider installing Whim Terminal (lite, fewer tabs) alongside Whim.m.</li>
+          <li><strong>Vehicle Head Unit:</strong> USB-connected ONN drive. Awaiting ADB sideload for APKs.</li>
+        </ul>
+      </div>
+      <div class="je-tags">
+        <span class="je-tag device">device</span>
+        <span class="je-tag infra">infra</span>
+      </div>
+    </div>
+
+    <div class="journal-entry yellow">
+      <div class="je-date">2026-05-02</div>
+      <div class="je-title">Connectivity and file push strategy</div>
+      <div class="je-body">
+        Current method for pushing APKs and configs to mobile devices is via driveway WiFi range from the PC. USB direct is used for phones/tablets docked at the desk. The vehicle head unit requires a different approach -- either USB OTG from the ONN drive or ADB over WiFi once 4G is provisioned.
+        <ul>
+          <li>Driveway WiFi: works for S22, S9, tablet when in range</li>
+          <li>USB at desk: direct ADB push for APKs, configs, voice refs</li>
+          <li>Vehicle: ONN 500GB USB is the bridge until 4G goes live</li>
+          <li>VPS tunnel: cross-network fallback for Whim.m when off-LAN</li>
+        </ul>
+      </div>
+      <div class="je-tags">
+        <span class="je-tag infra">infra</span>
+        <span class="je-tag device">device</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>whimgo.io / developer journal</p>
+</footer>
+
+<script>
+const STORAGE_KEY = 'whim_journal_entries';
+
+function loadEntries() {
+  const entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  const container = document.getElementById('journal-entries');
+  container.innerHTML = '';
+  entries.forEach((e, i) => {
+    const colorClass = e.tags.includes('blocked') ? 'red' : e.tags.includes('device') ? 'cyan' : e.tags.includes('infra') ? 'orange' : '';
+    const tagsHtml = e.tags.map(t => `<span class="je-tag ${t}">${t}</span>`).join('');
+    const div = document.createElement('div');
+    div.className = 'journal-entry' + (colorClass ? ' ' + colorClass : '');
+    div.innerHTML = `
+      <div class="je-date">${e.date}</div>
+      <div class="je-title">${escHtml(e.title)} <button class="btn btn-ghost btn-small" onclick="deleteEntry(${i})" style="float:right;font-size:0.65rem;padding:2px 8px;">x</button></div>
+      <div class="je-body">${escHtml(e.body).replace(/\n/g, '<br>')}</div>
+      <div class="je-tags">${tagsHtml}</div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function addEntry() {
+  const title = document.getElementById('je-new-title').value.trim();
+  const body = document.getElementById('je-new-body').value.trim();
+  if (!title || !body) return;
+  const tags = Array.from(document.querySelectorAll('.je-tag-check:checked')).map(c => c.value);
+  const entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  entries.unshift({
+    date: new Date().toISOString().split('T')[0],
+    title, body, tags
+  });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  document.getElementById('je-new-title').value = '';
+  document.getElementById('je-new-body').value = '';
+  document.querySelectorAll('.je-tag-check').forEach(c => c.checked = false);
+  loadEntries();
+}
+
+function deleteEntry(i) {
+  const entries = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  entries.splice(i, 1);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  loadEntries();
+}
+
+function escHtml(s) {
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+loadEntries();
+</script>
+</body>
+</html>
