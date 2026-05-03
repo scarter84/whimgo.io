@@ -459,6 +459,7 @@
       <li><a href="#arch">Architecture</a></li>
       <li><a href="#start">Get Started</a></li>
       <li><a href="journal.html" id="nav-journal" style="display:none;">Journal</a></li>
+      <li><a href="wisp.html" id="nav-wisp" style="display:none;">WISP</a></li>
       <li><a href="https://github.com/scarter84" target="_blank">GitHub</a></li>
     </ul>
     <div style="display:flex;align-items:center;gap:8px;">
@@ -1035,6 +1036,11 @@
           <div class="dc-value" style="font-size:0.75rem;color:var(--text-muted);margin-top:4px;">13.6" head unit / Qwen 1.5B offline</div>
         </div>
         <div class="dash-card">
+          <div class="dc-label">WISP Terminal</div>
+          <div class="dc-status"><span class="dc-dot online"></span> ttyd :7681 (Tailscale)</div><br>
+          <a href="wisp.html" style="font-family:var(--mono);font-size:0.75rem;color:var(--accent);margin-top:4px;display:inline-block;">Open WISP Console &rarr;</a>
+        </div>
+        <div class="dash-card">
           <div class="dc-label">Sideload Drive</div>
           <div class="dc-value">ONN 500GB USB -- connected to head unit</div>
         </div>
@@ -1073,6 +1079,7 @@
     <a href="#edge">Edge Match</a>
     <a href="#start">Downloads</a>
     <a href="journal.html" id="footer-journal" style="display:none;">Journal</a>
+    <a href="wisp.html" id="footer-wisp" style="display:none;">WISP</a>
     <a href="#community">Community</a>
   </div>
 </footer>
@@ -1141,6 +1148,8 @@ function showDash() {
   document.getElementById('nav-login-btn').textContent = 'Operator (on)';
   document.getElementById('nav-journal').style.display = '';
   document.getElementById('footer-journal').style.display = '';
+  document.getElementById('nav-wisp').style.display = '';
+  document.getElementById('footer-wisp').style.display = '';
 }
 function logoutOp() {
   sessionStorage.removeItem('op_auth');
@@ -1149,6 +1158,8 @@ function logoutOp() {
   document.getElementById('nav-login-btn').textContent = 'Operator';
   document.getElementById('nav-journal').style.display = 'none';
   document.getElementById('footer-journal').style.display = 'none';
+  document.getElementById('nav-wisp').style.display = 'none';
+  document.getElementById('footer-wisp').style.display = 'none';
 }
 document.getElementById('login-overlay').addEventListener('click', function(e) {
   if (e.target === this) { this.classList.remove('show'); }

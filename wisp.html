@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whim — WISP Terminal</title>
+  <meta name="description" content="WISP remote terminal -- operator access to CARRAMint via Tailscale mesh.">
+  <link rel="icon" type="image/png" href="assets/fire.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0e0e0e; --bg-card: #1a1a1a; --bg-elevated: #222222; --bg-surface: #2b2b2b;
+      --accent: #00ff00; --accent-glow: rgba(0,255,0,0.12);
+      --orange: #e08030; --orange-glow: rgba(224,128,48,0.12);
+      --cyan: #00e5ff; --blue: #1e6ea1; --red: #d94040; --yellow: #e0a030;
+      --text: #dce4ee; --text-dim: #888888; --text-muted: #555555;
+      --border: #2a2a2a; --border-hi: #3a3a3a;
+      --mono: 'JetBrains Mono', 'Courier New', monospace;
+      --sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.7; font-size: 15px; display: flex; flex-direction: column; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    ::selection { background: var(--blue); color: #fff; }
+
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(14,14,14,0.92); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      max-width: 1400px; margin: 0 auto; display: flex; align-items: center;
+      justify-content: space-between; height: 54px; padding: 0 32px;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px; text-decoration: none;
+      color: var(--text); font-family: var(--mono); font-weight: 700; font-size: 1rem;
+    }
+    .nav-logo img { height: 24px; width: 24px; }
+    .nav-logo .g { color: var(--accent); }
+    .nav-links { list-style: none; display: flex; gap: 1.5rem; }
+    .nav-links a { color: var(--text-dim); font-family: var(--mono); font-size: 0.8rem; text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--accent); text-decoration: none; }
+    .nav-links a.active { color: var(--accent); }
+
+    .auth-gate {
+      position: fixed; inset: 0; z-index: 300;
+      background: var(--bg); display: flex; justify-content: center; align-items: center;
+    }
+    .auth-gate.hidden { display: none; }
+    .auth-box {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 32px; width: 340px; text-align: center;
+    }
+    .auth-box h3 { font-family: var(--mono); color: var(--accent); margin-bottom: 16px; font-size: 1rem; }
+    .auth-box input {
+      width: 100%; padding: 10px 14px; margin-bottom: 12px;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+      color: var(--text); font-family: var(--mono); font-size: 0.85rem;
+    }
+    .auth-box input:focus { outline: none; border-color: var(--accent); }
+    .auth-box .auth-err { color: var(--red); font-family: var(--mono); font-size: 0.75rem; margin-top: 8px; display: none; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px; border-radius: 6px; font-family: var(--mono); font-size: 0.85rem;
+      text-decoration: none; transition: all 0.2s; border: none; cursor: pointer;
+    }
+    .btn-primary { background: var(--accent); color: #000; font-weight: 700; }
+    .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); }
+    .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .wisp-container {
+      flex: 1; display: flex; flex-direction: column; padding-top: 54px;
+    }
+
+    .wisp-toolbar {
+      background: var(--bg-card); border-bottom: 1px solid var(--border);
+      padding: 10px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .wisp-toolbar .wt-label {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .wisp-toolbar .wt-status {
+      display: flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: 0.8rem;
+    }
+    .wt-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .wt-dot.online { background: var(--accent); }
+    .wt-dot.offline { background: var(--red); }
+    .wt-dot.checking { background: var(--yellow); animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .wisp-toolbar .wt-target {
+      font-family: var(--mono); font-size: 0.82rem; color: var(--accent);
+      background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
+      padding: 4px 12px;
+    }
+    .wisp-toolbar .wt-actions { margin-left: auto; display: flex; gap: 8px; }
+    .wt-btn {
+      font-family: var(--mono); font-size: 0.7rem; color: var(--text-dim);
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      padding: 4px 10px; border-radius: 4px; cursor: pointer; transition: all 0.2s;
+    }
+    .wt-btn:hover { border-color: var(--orange); color: var(--orange); }
+    .wt-btn.active { border-color: var(--accent); color: var(--accent); }
+
+    .wisp-main { flex: 1; display: flex; min-height: 0; }
+
+    .wisp-terminal {
+      flex: 1; position: relative; background: #0a0a0a;
+    }
+    .wisp-terminal iframe {
+      width: 100%; height: 100%; border: none; background: #000;
+    }
+    .wisp-terminal .term-placeholder {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      justify-content: center; align-items: center; gap: 16px;
+      font-family: var(--mono); color: var(--text-muted);
+    }
+    .wisp-terminal .term-placeholder.hidden { display: none; }
+    .term-placeholder .tp-icon { font-size: 2.5rem; opacity: 0.3; }
+    .term-placeholder .tp-msg { font-size: 0.85rem; text-align: center; max-width: 400px; line-height: 1.6; }
+    .term-placeholder .tp-cmd {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px 18px; font-size: 0.78rem; color: var(--accent); white-space: pre; text-align: left;
+    }
+
+    .wisp-sidebar {
+      width: 320px; background: var(--bg-card); border-left: 1px solid var(--border);
+      display: flex; flex-direction: column; overflow-y: auto;
+    }
+    .wisp-sidebar.collapsed { display: none; }
+    .sidebar-section { padding: 16px; border-bottom: 1px solid var(--border); }
+    .sidebar-section h4 {
+      font-family: var(--mono); font-size: 0.75rem; color: var(--orange);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 10px;
+    }
+    .adb-cmd {
+      display: flex; align-items: center; gap: 8px; padding: 6px 0;
+      border-bottom: 1px solid var(--border); cursor: pointer; transition: all 0.15s;
+    }
+    .adb-cmd:last-child { border-bottom: none; }
+    .adb-cmd:hover { padding-left: 4px; }
+    .adb-cmd:hover .ac-name { color: var(--accent); }
+    .adb-cmd .ac-icon { font-size: 0.85rem; opacity: 0.5; width: 20px; text-align: center; }
+    .adb-cmd .ac-name { font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim); }
+    .adb-cmd .ac-detail { font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted); margin-left: auto; }
+
+    .device-row {
+      display: flex; align-items: center; gap: 8px; padding: 6px 0;
+      font-family: var(--mono); font-size: 0.78rem; color: var(--text-dim);
+    }
+    .device-row .dr-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .device-row .dr-dot.on { background: var(--accent); }
+    .device-row .dr-dot.off { background: var(--red); }
+    .device-row .dr-dot.dev { background: var(--yellow); }
+    .device-row .dr-ip { margin-left: auto; font-size: 0.7rem; color: var(--text-muted); }
+
+    .config-row {
+      display: flex; justify-content: space-between; padding: 4px 0;
+      font-family: var(--mono); font-size: 0.75rem;
+    }
+    .config-row .cr-key { color: var(--text-muted); }
+    .config-row .cr-val { color: var(--text-dim); }
+
+    footer { border-top: 1px solid var(--border); padding: 16px 32px; text-align: center; flex-shrink: 0; }
+    footer p { color: var(--text-muted); font-size: 0.75rem; font-family: var(--mono); }
+
+    @media (max-width: 900px) {
+      .wisp-sidebar { width: 100%; border-left: none; border-top: 1px solid var(--border); max-height: 260px; }
+      .wisp-main { flex-direction: column; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div class="auth-gate" id="auth-gate">
+  <div class="auth-box">
+    <h3>WISP -- Operator Access</h3>
+    <input type="password" id="gate-pass" placeholder="passphrase" onkeydown="if(event.key==='Enter')gateLogin()">
+    <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="gateLogin()">Authenticate</button>
+    <div class="auth-err" id="gate-err">Invalid passphrase</div>
+  </div>
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="assets/fire.png" alt="Whim">
+      whim<span class="g">go</span>.io
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="index.html#features">Features</a></li>
+      <li><a href="journal.html">Journal</a></li>
+      <li><a href="wisp.html" class="active">WISP</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="wisp-container">
+  <div class="wisp-toolbar">
+    <span class="wt-label">WISP Terminal</span>
+    <span class="wt-status" id="conn-status"><span class="wt-dot checking" id="conn-dot"></span> <span id="conn-text">Checking...</span></span>
+    <span class="wt-target" id="ttyd-target">100.69.17.20:7681</span>
+    <div class="wt-actions">
+      <button class="wt-btn" onclick="connectTTYD()" id="btn-connect">Connect</button>
+      <button class="wt-btn" onclick="disconnectTTYD()" id="btn-disconnect" style="display:none;">Disconnect</button>
+      <button class="wt-btn active" onclick="toggleSidebar()" id="btn-sidebar">Sidebar</button>
+    </div>
+  </div>
+
+  <div class="wisp-main">
+    <div class="wisp-terminal" id="terminal-pane">
+      <div class="term-placeholder" id="term-placeholder">
+        <div class="tp-icon">></div>
+        <div class="tp-msg">
+          WISP connects to CARRAMint via ttyd over your Tailscale mesh.<br>
+          Ensure ttyd is running on the target host, then click <strong>Connect</strong>.
+        </div>
+        <div class="tp-cmd">
+# On CARRAMint (one-time setup):
+sudo apt install ttyd
+ttyd -p 7681 -i 100.69.17.20 bash
+
+# Or use the systemd service:
+sudo systemctl start wisp-ttyd</div>
+      </div>
+    </div>
+
+    <div class="wisp-sidebar" id="sidebar">
+      <div class="sidebar-section">
+        <h4>ADB Quick Actions</h4>
+        <div class="adb-cmd" onclick="copyCmd('adb connect 100.64.255.124:5555')">
+          <span class="ac-icon">+</span>
+          <span class="ac-name">Connect Vehicle HU</span>
+          <span class="ac-detail">:5555</span>
+        </div>
+        <div class="adb-cmd" onclick="copyCmd('adb install /home/tommymunro/Apps/whim_m.apk')">
+          <span class="ac-icon">^</span>
+          <span class="ac-name">Push Whim.m APK</span>
+          <span class="ac-detail">sideload</span>
+        </div>
+        <div class="adb-cmd" onclick="copyCmd('adb install /home/tommymunro/Apps/whim_v.apk')">
+          <span class="ac-icon">^</span>
+          <span class="ac-name">Push Whim.v APK</span>
+          <span class="ac-detail">sideload</span>
+        </div>
+        <div class="adb-cmd" onclick="copyCmd('adb devices -l')">
+          <span class="ac-icon">?</span>
+          <span class="ac-name">List Devices</span>
+          <span class="ac-detail">adb</span>
+        </div>
+        <div class="adb-cmd" onclick="copyCmd('adb shell screencap -p /sdcard/screen.png && adb pull /sdcard/screen.png')">
+          <span class="ac-icon">S</span>
+          <span class="ac-name">Screenshot Vehicle</span>
+          <span class="ac-detail">screencap</span>
+        </div>
+        <div class="adb-cmd" onclick="copyCmd('adb shell pm list packages | grep whim')">
+          <span class="ac-icon">L</span>
+          <span class="ac-name">List Whim Packages</span>
+          <span class="ac-detail">pm</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h4>Mesh Devices</h4>
+        <div class="device-row"><span class="dr-dot on"></span> CARRAMint <span class="dr-ip">100.69.17.20</span></div>
+        <div class="device-row"><span class="dr-dot on"></span> Galaxy S22 <span class="dr-ip">100.77.59.2</span></div>
+        <div class="device-row"><span class="dr-dot on"></span> Galaxy S9 <span class="dr-ip">100.97.96.1</span></div>
+        <div class="device-row"><span class="dr-dot on"></span> Lenovo Tablet <span class="dr-ip">100.64.255.124</span></div>
+        <div class="device-row"><span class="dr-dot dev"></span> Vehicle HU <span class="dr-ip">pending</span></div>
+      </div>
+
+      <div class="sidebar-section">
+        <h4>ttyd Config</h4>
+        <div class="config-row"><span class="cr-key">Host</span><span class="cr-val">CARRAMint</span></div>
+        <div class="config-row"><span class="cr-key">Bind</span><span class="cr-val">100.69.17.20</span></div>
+        <div class="config-row"><span class="cr-key">Port</span><span class="cr-val">7681</span></div>
+        <div class="config-row"><span class="cr-key">Shell</span><span class="cr-val">bash</span></div>
+        <div class="config-row"><span class="cr-key">Auth</span><span class="cr-val">Tailscale ACL</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>whimgo.io / wisp terminal / tailscale mesh only</p>
+</footer>
+
+<script>
+const OP_HASH = '96a80101f4f3e7d36be92b931813ad9f779a1a9851491cc9861d14a0adeb3f07';
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+async function gateLogin() {
+  const pass = document.getElementById('gate-pass').value;
+  const hash = await sha256(pass);
+  if (hash === OP_HASH) {
+    sessionStorage.setItem('op_auth', '1');
+    document.getElementById('auth-gate').classList.add('hidden');
+  } else {
+    document.getElementById('gate-err').style.display = 'block';
+  }
+}
+if (sessionStorage.getItem('op_auth') === '1') {
+  document.getElementById('auth-gate').classList.add('hidden');
+} else {
+  document.getElementById('gate-pass').focus();
+}
+
+const TTYD_URL = 'http://100.69.17.20:7681';
+let connected = false;
+
+function connectTTYD() {
+  const pane = document.getElementById('terminal-pane');
+  const placeholder = document.getElementById('term-placeholder');
+  const existing = pane.querySelector('iframe');
+  if (existing) existing.remove();
+
+  const iframe = document.createElement('iframe');
+  iframe.src = TTYD_URL;
+  iframe.setAttribute('allow', 'clipboard-read; clipboard-write');
+  pane.appendChild(iframe);
+  placeholder.classList.add('hidden');
+
+  document.getElementById('btn-connect').style.display = 'none';
+  document.getElementById('btn-disconnect').style.display = '';
+  document.getElementById('conn-dot').className = 'wt-dot online';
+  document.getElementById('conn-text').textContent = 'Connected';
+  connected = true;
+}
+
+function disconnectTTYD() {
+  const pane = document.getElementById('terminal-pane');
+  const iframe = pane.querySelector('iframe');
+  if (iframe) iframe.remove();
+
+  document.getElementById('term-placeholder').classList.remove('hidden');
+  document.getElementById('btn-connect').style.display = '';
+  document.getElementById('btn-disconnect').style.display = 'none';
+  document.getElementById('conn-dot').className = 'wt-dot offline';
+  document.getElementById('conn-text').textContent = 'Disconnected';
+  connected = false;
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  const btn = document.getElementById('btn-sidebar');
+  sb.classList.toggle('collapsed');
+  btn.classList.toggle('active');
+}
+
+function copyCmd(cmd) {
+  navigator.clipboard.writeText(cmd).then(() => {
+    const toast = document.createElement('div');
+    toast.textContent = 'Copied: ' + cmd;
+    toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg-elevated);border:1px solid var(--accent);color:var(--accent);font-family:var(--mono);font-size:0.75rem;padding:8px 16px;border-radius:6px;z-index:999;';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+  });
+}
+
+// Check ttyd reachability on load
+(async function checkTTYD() {
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 3000);
+    await fetch(TTYD_URL, { mode: 'no-cors', signal: ctrl.signal });
+    document.getElementById('conn-dot').className = 'wt-dot online';
+    document.getElementById('conn-text').textContent = 'ttyd reachable';
+  } catch {
+    document.getElementById('conn-dot').className = 'wt-dot offline';
+    document.getElementById('conn-text').textContent = 'ttyd unreachable';
+  }
+})();
+</script>
+</body>
+</html>
