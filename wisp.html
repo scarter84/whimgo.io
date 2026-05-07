@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Whim — WISP Terminal</title>
   <meta name="description" content="WISP remote terminal -- operator access to CARRAMint via Tailscale mesh.">
-  <link rel="icon" type="image/png" href="assets/fire.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/fire.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/fire.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/assets/fire.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -229,7 +231,16 @@
         <div class="tp-cmd">
 # On CARRAMint (one-time setup):
 sudo apt install ttyd
-ttyd -p 7681 -i 100.69.17.20 bash
+
+# Generate self-signed cert (or use tailscale cert):
+openssl req -x509 -newkey rsa:2048 -nodes \
+  -keyout ~/.ttyd/key.pem -out ~/.ttyd/cert.pem \
+  -days 365 -subj '/CN=100.69.17.20'
+
+# Launch with TLS:
+ttyd -p 7681 -i 100.69.17.20 \
+  --ssl-cert ~/.ttyd/cert.pem \
+  --ssl-key ~/.ttyd/key.pem bash
 
 # Or use the systemd service:
 sudo systemctl start wisp-ttyd</div>
@@ -318,8 +329,14 @@ if (sessionStorage.getItem('op_auth') === '1') {
   document.getElementById('gate-pass').focus();
 }
 
-const TTYD_URL = 'http://100.69.17.20:7681';
+const TTYD_URL = 'https://100.69.17.20:7681';
 let connected = false;
+let connectTimeout = null;
+
+function setStatus(cls, text) {
+  document.getElementById('conn-dot').className = 'wt-dot ' + cls;
+  document.getElementById('conn-text').textContent = text;
+}
 
 function connectTTYD() {
   const pane = document.getElementById('terminal-pane');
@@ -327,20 +344,32 @@ function connectTTYD() {
   const existing = pane.querySelector('iframe');
   if (existing) existing.remove();
 
+  setStatus('checking', 'Connecting...');
+  document.getElementById('btn-connect').style.display = 'none';
+  document.getElementById('btn-disconnect').style.display = '';
+
   const iframe = document.createElement('iframe');
   iframe.src = TTYD_URL;
   iframe.setAttribute('allow', 'clipboard-read; clipboard-write');
+
+  iframe.onload = function() {
+    clearTimeout(connectTimeout);
+    setStatus('online', 'Connected');
+    connected = true;
+  };
+
+  connectTimeout = setTimeout(function() {
+    if (!connected) {
+      setStatus('offline', 'Load timeout -- check ttyd TLS');
+    }
+  }, 8000);
+
   pane.appendChild(iframe);
   placeholder.classList.add('hidden');
-
-  document.getElementById('btn-connect').style.display = 'none';
-  document.getElementById('btn-disconnect').style.display = '';
-  document.getElementById('conn-dot').className = 'wt-dot online';
-  document.getElementById('conn-text').textContent = 'Connected';
-  connected = true;
 }
 
 function disconnectTTYD() {
+  clearTimeout(connectTimeout);
   const pane = document.getElementById('terminal-pane');
   const iframe = pane.querySelector('iframe');
   if (iframe) iframe.remove();
@@ -348,8 +377,7 @@ function disconnectTTYD() {
   document.getElementById('term-placeholder').classList.remove('hidden');
   document.getElementById('btn-connect').style.display = '';
   document.getElementById('btn-disconnect').style.display = 'none';
-  document.getElementById('conn-dot').className = 'wt-dot offline';
-  document.getElementById('conn-text').textContent = 'Disconnected';
+  setStatus('offline', 'Disconnected');
   connected = false;
 }
 
@@ -374,13 +402,19 @@ function copyCmd(cmd) {
 (async function checkTTYD() {
   try {
     const ctrl = new AbortController();
-    setTimeout(() => ctrl.abort(), 3000);
-    await fetch(TTYD_URL, { mode: 'no-cors', signal: ctrl.signal });
-    document.getElementById('conn-dot').className = 'wt-dot online';
-    document.getElementById('conn-text').textContent = 'ttyd reachable';
-  } catch {
-    document.getElementById('conn-dot').className = 'wt-dot offline';
-    document.getElementById('conn-text').textContent = 'ttyd unreachable';
+    setTimeout(() => ctrl.abort(), 4000);
+    const resp = await fetch(TTYD_URL, { signal: ctrl.signal });
+    if (resp.ok || resp.type === 'opaque') {
+      setStatus('online', 'ttyd reachable');
+    } else {
+      setStatus('offline', 'ttyd returned ' + resp.status);
+    }
+  } catch(e) {
+    if (e.name === 'AbortError') {
+      setStatus('offline', 'ttyd timeout');
+    } else {
+      setStatus('offline', 'ttyd unreachable');
+    }
   }
 })();
 </script>

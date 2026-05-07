@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Whim — Local-First AI Terminal for Desktop, Mobile & Vehicle</title>
   <meta name="description" content="Whim is an open-source desktop and mobile ecosystem that unifies voice AI, local LLM chat, weather radar, APRS radio, geofencing, IoT control, and vehicle integration into a single sovereign application. No cloud. No subscriptions. Your hardware, your models.">
-  <link rel="icon" type="image/png" href="assets/fire.png">
-  <link rel="apple-touch-icon" href="assets/Whim.png">
-  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="512x512" href="/assets/fire.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/fire.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="/assets/fire.png">
+  <link rel="icon" type="image/png" sizes="144x144" href="/assets/fire.png">
+  <link rel="apple-touch-icon" sizes="512x512" href="/assets/fire.png">
+  <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#00ff00">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -460,6 +463,7 @@
       <li><a href="#start">Get Started</a></li>
       <li><a href="journal.html" id="nav-journal" style="display:none;">Journal</a></li>
       <li><a href="wisp.html" id="nav-wisp" style="display:none;">WISP</a></li>
+      <li><a href="https://scarter84.github.io/0411/" target="_blank">Manual</a></li>
       <li><a href="https://github.com/scarter84" target="_blank">GitHub</a></li>
     </ul>
     <div style="display:flex;align-items:center;gap:8px;">
@@ -496,12 +500,13 @@
     <div class="product-statement">
       <h3>One terminal. Everything connected.</h3>
       <p>
-        Whim is a Python desktop application (Tkinter) with 18 module tabs organized across two rows.
+        Whim is a Python desktop application (Tkinter) with 20 module tabs organized across two rows.
         It connects to local LLMs through Ollama (DeepSeek R1:32B, Llama 3.1:8B), drives a voice
         pipeline with XTTS v2 text-to-speech and wake word detection, controls Samsung SmartThings
         devices, integrates Signal and Discord messaging, runs a weather radar with NEXRAD overlay,
-        monitors APRS amateur radio stations, tracks livestock via geofencing, and manages Android
-        devices through ADB.
+        monitors APRS amateur radio stations, tracks livestock via geofencing, manages Android
+        devices through ADB, and now includes a persistent AI memory system (GBrain) with
+        knowledge graph, entity tracking, timeline view, and natural language brain search.
       </p>
       <p>
         A companion mobile app (Whim.m) runs on Android phones and tablets, connecting over a reverse
@@ -533,6 +538,9 @@
       <span class="tab-pill">SIGNAL</span>
       <span class="tab-pill">SS</span>
       <span class="tab-pill">LIBRARY</span>
+      <span class="tab-pill">OPUS</span>
+      <span class="tab-pill">EMAIL</span>
+      <span class="tab-pill" style="color:#2fa572;border-color:#2fa572">BRAIN</span>
       <span class="tab-pill">SETTINGS</span>
     </div>
 
@@ -591,7 +599,7 @@
           <span class="fc-name">Whim.AI -- Local LLM Console</span>
           <span class="fc-tag">Core</span>
         </div>
-        <p>Full AI chat with local Ollama models. System presets, observability panel, context metering, tool trace, output templates, and token usage tracking. Switch between DeepSeek R1:32B (reasoning), Llama 3.1:8B (fast chat), and Qwen (tool use) from the header dropdown.</p>
+        <p>Full AI chat with local Ollama models. System presets, observability panel, context metering, tool trace, output templates, and token usage tracking. Switch between DeepSeek R1:32B (reasoning), Llama 3.1:8B (fast chat), and Qwen (tool use) from the header dropdown. GBrain knowledge retrieval via /gbrain commands, ecosystem dictionary context injection, and cloud fallback routing when local models are unavailable.</p>
       </div>
       <div class="feat-card">
         <div class="fc-head">
@@ -681,6 +689,30 @@
         </div>
         <p>JSON-RPC over WebSocket (port 18789). The AI agent protocol layer connecting the terminal to Ollama inference with model switching, context injection, tool definitions, and multi-model routing.</p>
       </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot green"></span>
+          <span class="fc-name">BRAIN -- GBrain Knowledge Engine</span>
+          <span class="fc-tag">Memory</span>
+        </div>
+        <p>Persistent AI memory powered by GBrain (PGLite + pgvector). Natural language search with type filters (Pages, Entities, Timeline, Repos), Entity Explorer with backlink visualization, Timeline View with date range selectors, Dream Cycle scheduler, Obsidian-compatible export, and auto-enrichment triggers. Ctrl+Shift+G opens a quick brain query from any tab. Droid write permissions require explicit user confirmation.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot orange"></span>
+          <span class="fc-name">Email -- Himalaya Integration</span>
+          <span class="fc-tag">Communication</span>
+        </div>
+        <p>CLI email client integrated directly into the terminal and Whim.ai chat. List inbox headers, read individual messages, search across mailbox. IMAP/SMTP configuration in the Settings tab. No browser required.</p>
+      </div>
+      <div class="feat-card">
+        <div class="fc-head">
+          <span class="fc-dot cyan"></span>
+          <span class="fc-name">Whim Dictionary</span>
+          <span class="fc-tag">Context</span>
+        </div>
+        <p>43-term ecosystem glossary injected into every Whim.ai system prompt. Provides the AI with knowledge of all subsystems, GitHub repository locations, device names, and GBrain integration context. The AI knows what Whim is and where everything lives.</p>
+      </div>
     </div>
 
     <!-- VOICE STATE SYSTEM -->
@@ -713,7 +745,7 @@
       <div class="arch-tier">
         <div class="arch-node" style="min-width: 300px;">
           <div class="an-name">Whim Terminal</div>
-          <div class="an-desc">Desktop command center / 18 tabs / Tkinter<br>LLM routing / Voice engine / APRS / GeoF / IoT</div>
+          <div class="an-desc">Desktop command center / 20 tabs / Tkinter<br>LLM routing / Voice engine / APRS / GeoF / IoT / GBrain</div>
         </div>
         <div class="arch-node">
           <div class="an-name">OpenClaw Gateway</div>
@@ -760,6 +792,14 @@
         <div class="arch-node">
           <div class="an-name">SmartThings</div>
           <div class="an-desc">IoT device control</div>
+        </div>
+        <div class="arch-node" style="border-color: #2fa572;">
+          <div class="an-name" style="color: #2fa572;">GBrain</div>
+          <div class="an-desc">AI memory / PGLite + pgvector<br>Knowledge graph / 34 skills / Dream cycle</div>
+        </div>
+        <div class="arch-node">
+          <div class="an-name">Himalaya</div>
+          <div class="an-desc">CLI email / IMAP + SMTP</div>
         </div>
       </div>
     </div>
@@ -996,7 +1036,7 @@
         <p>Talk to Enoch (the OpenClaw bot), share your builds, debug configurations, and help shape the roadmap. The community runs on the same sovereign principles as the software.</p>
       </div>
       <div class="comm-card">
-        <h3>Read the Manual</h3>
+        <h3><a href="https://scarter84.github.io/0411/" target="_blank">Read the Manual</a></h3>
         <p>Full system documentation: architecture topology, voice engine tuning, networking setup, tab reference, and deployment guides for Linux, macOS, Windows, and Android.</p>
       </div>
       <div class="comm-card">
@@ -1080,6 +1120,7 @@
     <a href="#start">Downloads</a>
     <a href="journal.html" id="footer-journal" style="display:none;">Journal</a>
     <a href="wisp.html" id="footer-wisp" style="display:none;">WISP</a>
+    <a href="https://scarter84.github.io/0411/" target="_blank">Manual</a>
     <a href="#community">Community</a>
   </div>
 </footer>

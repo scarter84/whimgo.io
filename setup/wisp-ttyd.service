@@ -5,7 +5,8 @@ Wants=tailscaled.service
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/ttyd -p 7681 -i 100.69.17.20 -t fontSize=14 -t fontFamily=JetBrains\ Mono,monospace -t theme={"background":"#0a0a0a","foreground":"#dce4ee","cursor":"#00ff00"} /bin/bash
+ExecStartPre=/bin/bash -c 'mkdir -p /home/tommymunro/.ttyd && [ -f /home/tommymunro/.ttyd/cert.pem ] || openssl req -x509 -newkey rsa:2048 -nodes -keyout /home/tommymunro/.ttyd/key.pem -out /home/tommymunro/.ttyd/cert.pem -days 365 -subj "/CN=100.69.17.20"'
+ExecStart=/usr/bin/ttyd -p 7681 -i 100.69.17.20 --ssl-cert /home/tommymunro/.ttyd/cert.pem --ssl-key /home/tommymunro/.ttyd/key.pem -t fontSize=14 -t fontFamily=JetBrains\ Mono,monospace -t theme={"background":"#0a0a0a","foreground":"#dce4ee","cursor":"#00ff00"} /bin/bash
 Restart=on-failure
 RestartSec=5
 User=tommymunro
