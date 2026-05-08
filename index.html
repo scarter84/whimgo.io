@@ -42,7 +42,7 @@
       --sans: 'Inter', -apple-system, 'Segoe UI', sans-serif;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
     body {
       background: var(--bg);
       color: var(--text);
@@ -50,11 +50,14 @@
       line-height: 1.7;
       font-size: 15px;
       overflow-x: hidden;
+      max-width: 100vw;
     }
     a { color: var(--accent); text-decoration: none; }
     a:hover { text-decoration: underline; }
     ::selection { background: var(--blue); color: #fff; }
-    img { max-width: 100%; display: block; }
+    img { max-width: 100%; display: block; height: auto; }
+    iframe { max-width: 100%; }
+    video { max-width: 100%; }
 
     /* NAV */
     nav {
@@ -67,6 +70,7 @@
       max-width: 1100px; margin: 0 auto;
       display: flex; align-items: center; justify-content: space-between;
       height: 54px; padding: 0 32px;
+      overflow: hidden;
     }
     .nav-logo {
       display: flex; align-items: center; gap: 10px;
@@ -140,7 +144,7 @@
     /* WHAT IS WHIM - PRODUCT OVERVIEW */
     .product-statement {
       background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 40px; margin-bottom: 40px;
+      padding: 40px; margin-bottom: 40px; overflow-wrap: break-word;
     }
     .product-statement h3 {
       font-family: var(--mono); font-size: 1.1rem; color: var(--accent); margin-bottom: 12px;
@@ -183,7 +187,7 @@
       font-family: var(--mono); font-size: 0.65rem; color: var(--text-muted);
       background: var(--bg); padding: 2px 8px; border-radius: 4px; margin-left: auto;
     }
-    .feat-card p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; }
+    .feat-card p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; overflow-wrap: break-word; word-break: break-word; }
 
     /* SCREENSHOTS */
     .ss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
@@ -236,7 +240,7 @@
     /* TERMINAL BLOCK */
     .term {
       background: #0a0a0a; border: 1px solid var(--border); border-radius: 10px;
-      overflow: hidden; margin: 24px 0; max-width: 720px;
+      overflow: hidden; margin: 24px 0; max-width: 720px; max-width: min(720px, 100%);
     }
     .term-head {
       background: var(--bg-surface); padding: 8px 14px;
@@ -248,6 +252,7 @@
     .term-body {
       padding: 16px 20px; font-family: var(--mono); font-size: 0.82rem;
       line-height: 1.9; color: var(--text);
+      overflow-wrap: break-word; word-break: break-all;
     }
     .term-body .p { color: var(--accent); }
     .term-body .c { color: var(--text-muted); }
@@ -306,7 +311,7 @@
     #gpu-select {
       font-family: var(--mono); font-size: 0.82rem;
       background: var(--bg-card); color: var(--text); border: 1px solid var(--border);
-      padding: 8px 14px; border-radius: 6px; min-width: 260px; cursor: pointer;
+      padding: 8px 14px; border-radius: 6px; min-width: 0; max-width: 100%; width: 100%; cursor: pointer;
     }
     #gpu-select:focus { outline: none; border-color: var(--accent); }
     #gpu-select option { background: var(--bg-card); color: var(--text); }
@@ -420,6 +425,7 @@
     /* RESPONSIVE */
     @media (max-width: 768px) {
       .nav-links { display: none; }
+      .nav-inner { padding: 0 12px; }
       .ss-grid { grid-template-columns: 1fr; }
       .ss-phone-grid { grid-template-columns: 1fr 1fr; }
       .feat-grid { grid-template-columns: 1fr; }
@@ -427,10 +433,23 @@
       .comm-grid { grid-template-columns: 1fr; }
       section { padding: 48px 0; }
       .wrap { padding: 0 16px; }
-      .product-statement { padding: 24px; }
+      .hero { padding: 100px 16px 48px; }
+      .hero-desc { font-size: 1rem; }
+      .product-statement { padding: 20px; }
       .arch-tier { flex-direction: column; align-items: center; }
-      .arch-node { min-width: auto; width: 100%; max-width: 300px; }
-      #arch-3d iframe { height: 380px; }
+      .arch-node { min-width: auto; width: 100%; max-width: 100%; }
+      #arch-3d iframe { height: 320px; }
+      #arch-3d { overflow: hidden; }
+      .arch-box { overflow-x: hidden; padding: 16px; }
+      .edge-select-wrap { flex-direction: column; align-items: stretch; }
+      #gpu-select { min-width: 0; width: 100%; }
+      .vram-note { font-size: 0.7rem; }
+      .term-body { padding: 12px 14px; font-size: 0.75rem; }
+      .dash-grid { grid-template-columns: 1fr; }
+      .login-box { width: 90%; max-width: 340px; }
+      .tab-strip { padding: 10px; gap: 4px; }
+      .tab-pill { font-size: 0.6rem; padding: 3px 8px; }
+      .feat-card { padding: 16px; }
 
       /* responsive tables: stack into labeled cards on mobile */
       table, thead, tbody, th, td, tr { display: block; }
@@ -443,6 +462,7 @@
       td {
         padding: 5px 0; border: none; position: relative;
         padding-left: 42%; text-align: right; font-size: 0.8rem;
+        overflow-wrap: break-word; word-break: break-word;
       }
       td::before {
         content: attr(data-label);
@@ -452,14 +472,20 @@
         white-space: nowrap;
       }
       tr:nth-child(even) td { background: none; }
+      td code { word-break: break-all; }
 
-      /* edge-match table keeps visible rows, just wraps better */
       .edge-table td { font-size: 0.75rem; }
+
+      .footer-links { flex-wrap: wrap; gap: 0.8rem; }
     }
     @media (max-width: 480px) {
       .ss-phone-grid { grid-template-columns: 1fr; }
-      .tab-strip { padding: 10px; }
+      .tab-strip { padding: 8px; }
+      .tab-pill { font-size: 0.55rem; padding: 2px 6px; }
       td { padding-left: 45%; font-size: 0.75rem; }
+      .hero h1 { letter-spacing: 2px; }
+      .hero-sub { letter-spacing: 1px; font-size: 13px; }
+      .sec-title { font-size: 1.5rem; }
     }
   </style>
 </head>
@@ -785,10 +811,10 @@
     <p class="sec-desc">A federated mesh of nodes. Each device operates autonomously, syncs when connected, stays independent when offline.</p>
 
     <!-- 3D / Flat view toggle -->
-    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
       <button id="arch-toggle-3d" onclick="toggleArchView('3d')" style="background: var(--accent-dim); color: #fff; border: 1px solid var(--accent-dim); border-radius: 4px; font-family: var(--mono); font-size: 0.75rem; padding: 5px 14px; cursor: pointer; transition: all 0.2s;">&#x25A6; 3D View</button>
       <button id="arch-toggle-flat" onclick="toggleArchView('flat')" style="background: transparent; color: var(--text-dim); border: 1px solid var(--border-hi); border-radius: 4px; font-family: var(--mono); font-size: 0.75rem; padding: 5px 14px; cursor: pointer; transition: all 0.2s;">&#x25A4; Flat View</button>
-      <span style="color: var(--text-muted); font-size: 0.7rem; font-family: var(--mono);">Drag to orbit &middot; Scroll to zoom &middot; Hover nodes to inspect</span>
+      <span style="color: var(--text-muted); font-size: 0.7rem; font-family: var(--mono);">Drag to orbit &middot; Scroll to zoom</span>
     </div>
 
     <!-- 3D interactive architecture -->
@@ -803,7 +829,7 @@
       <div class="arch-flow">|</div>
 
       <div class="arch-tier">
-        <div class="arch-node" style="min-width: 300px;">
+        <div class="arch-node">
           <div class="an-name">Whim Terminal</div>
           <div class="an-desc">Desktop command center / 20 tabs / Tkinter<br>LLM routing / Voice engine / APRS / GeoF / IoT / GBrain</div>
         </div>
