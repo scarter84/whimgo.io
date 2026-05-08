@@ -515,6 +515,26 @@
   </div>
 </header>
 
+<!-- SHOWCASE VIDEO -->
+<section id="showcase" style="padding: 32px 0 0;">
+  <div class="wrap" style="max-width: 860px;">
+    <video
+      id="showcase-video"
+      autoplay muted loop playsinline
+      preload="metadata"
+      poster="assets/fire.png"
+      style="width: 100%; border-radius: 10px; border: 1px solid var(--border-hi); background: #000; display: block;"
+    >
+      <source src="assets/whim_showcase.mp4" type="video/mp4">
+    </video>
+    <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 10px;">
+      <button onclick="var v=document.getElementById('showcase-video'); v.muted=!v.muted; this.textContent=v.muted?'\u{1F507} Unmute':'\u{1F50A} Mute';"
+        style="background: transparent; border: 1px solid var(--border-hi); border-radius: 4px; color: var(--text-dim); font-family: var(--mono); font-size: 0.7rem; padding: 4px 12px; cursor: pointer;">&#x1F507; Unmute</button>
+      <span style="color: var(--text-muted); font-size: 0.65rem; font-family: var(--mono);">108s &middot; 720p60 &middot; Overview</span>
+    </div>
+  </div>
+</section>
+
 <hr class="div">
 
 <!-- WHAT IS WHIM -->
