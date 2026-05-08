@@ -430,10 +430,36 @@
       .product-statement { padding: 24px; }
       .arch-tier { flex-direction: column; align-items: center; }
       .arch-node { min-width: auto; width: 100%; max-width: 300px; }
+      #arch-3d iframe { height: 380px; }
+
+      /* responsive tables: stack into labeled cards on mobile */
+      table, thead, tbody, th, td, tr { display: block; }
+      thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+      tr {
+        margin-bottom: 10px; border: 1px solid var(--border-hi);
+        border-radius: 8px; padding: 8px 12px;
+        background: var(--bg-card);
+      }
+      td {
+        padding: 5px 0; border: none; position: relative;
+        padding-left: 42%; text-align: right; font-size: 0.8rem;
+      }
+      td::before {
+        content: attr(data-label);
+        position: absolute; left: 0; top: 5px;
+        font-weight: 600; color: var(--blue); font-size: 0.7rem;
+        text-transform: uppercase; letter-spacing: 0.3px;
+        white-space: nowrap;
+      }
+      tr:nth-child(even) td { background: none; }
+
+      /* edge-match table keeps visible rows, just wraps better */
+      .edge-table td { font-size: 0.75rem; }
     }
     @media (max-width: 480px) {
       .ss-phone-grid { grid-template-columns: 1fr; }
       .tab-strip { padding: 10px; }
+      td { padding-left: 45%; font-size: 0.75rem; }
     }
   </style>
 </head>
@@ -843,10 +869,10 @@
         <tr><th>Device</th><th>LAN IP</th><th>Tailscale IP</th><th>Role</th></tr>
       </thead>
       <tbody>
-        <tr><td>PC (CARRAMint)</td><td><code>192.168.1.231</code></td><td><code>100.69.17.20</code></td><td>Server hub</td></tr>
-        <tr><td>Galaxy S22</td><td>--</td><td><code>100.77.59.2</code></td><td>Primary mobile</td></tr>
-        <tr><td>Galaxy S9</td><td><code>192.168.1.198</code></td><td><code>100.97.96.1</code></td><td>Secondary mobile</td></tr>
-        <tr><td>Lenovo Tablet</td><td><code>192.168.1.112</code></td><td><code>100.64.255.124</code></td><td>Tablet client</td></tr>
+        <tr><td data-label="Device">PC (CARRAMint)</td><td data-label="LAN IP"><code>192.168.1.231</code></td><td data-label="Tailscale IP"><code>100.69.17.20</code></td><td data-label="Role">Server hub</td></tr>
+        <tr><td data-label="Device">Galaxy S22</td><td data-label="LAN IP">--</td><td data-label="Tailscale IP"><code>100.77.59.2</code></td><td data-label="Role">Primary mobile</td></tr>
+        <tr><td data-label="Device">Galaxy S9</td><td data-label="LAN IP"><code>192.168.1.198</code></td><td data-label="Tailscale IP"><code>100.97.96.1</code></td><td data-label="Role">Secondary mobile</td></tr>
+        <tr><td data-label="Device">Lenovo Tablet</td><td data-label="LAN IP"><code>192.168.1.112</code></td><td data-label="Tailscale IP"><code>100.64.255.124</code></td><td data-label="Role">Tablet client</td></tr>
       </tbody>
     </table>
 
@@ -856,13 +882,13 @@
         <tr><th>Channel</th><th>Protocol</th><th>Port</th><th>Purpose</th></tr>
       </thead>
       <tbody>
-        <tr><td>OpenClaw Gateway</td><td>WebSocket</td><td>18789</td><td>Core command bus</td></tr>
-        <tr><td>Whim.m Server</td><td>HTTP</td><td>8089</td><td>Mobile app backend</td></tr>
-        <tr><td>Journal Ingest</td><td>HTTP multipart</td><td>8088</td><td>Voice recording upload</td></tr>
-        <tr><td>Screen Share</td><td>MJPEG</td><td>8091</td><td>Desktop-to-phone stream</td></tr>
-        <tr><td>SSH Tunnel</td><td>Reverse SSH via VPS</td><td>8089</td><td>Cross-network access</td></tr>
-        <tr><td>Ollama</td><td>HTTP REST</td><td>11434</td><td>LLM inference</td></tr>
-        <tr><td>Signal CLI</td><td>HTTP</td><td>8080</td><td>Messaging</td></tr>
+        <tr><td data-label="Channel">OpenClaw Gateway</td><td data-label="Protocol">WebSocket</td><td data-label="Port">18789</td><td data-label="Purpose">Core command bus</td></tr>
+        <tr><td data-label="Channel">Whim.m Server</td><td data-label="Protocol">HTTP</td><td data-label="Port">8089</td><td data-label="Purpose">Mobile app backend</td></tr>
+        <tr><td data-label="Channel">Journal Ingest</td><td data-label="Protocol">HTTP multipart</td><td data-label="Port">8088</td><td data-label="Purpose">Voice recording upload</td></tr>
+        <tr><td data-label="Channel">Screen Share</td><td data-label="Protocol">MJPEG</td><td data-label="Port">8091</td><td data-label="Purpose">Desktop-to-phone stream</td></tr>
+        <tr><td data-label="Channel">SSH Tunnel</td><td data-label="Protocol">Reverse SSH via VPS</td><td data-label="Port">8089</td><td data-label="Purpose">Cross-network access</td></tr>
+        <tr><td data-label="Channel">Ollama</td><td data-label="Protocol">HTTP REST</td><td data-label="Port">11434</td><td data-label="Purpose">LLM inference</td></tr>
+        <tr><td data-label="Channel">Signal CLI</td><td data-label="Protocol">HTTP</td><td data-label="Port">8080</td><td data-label="Purpose">Messaging</td></tr>
       </tbody>
     </table>
   </div>
@@ -922,39 +948,39 @@
       </thead>
       <tbody>
         <tr data-tier="edge">
-          <td><strong>Edge / Mobile</strong></td>
-          <td>1B - 3B</td>
-          <td>2 - 4 GB</td>
-          <td>iGPU / Steam Deck / RPi / 8GB RAM</td>
-          <td>Near-instant response</td>
+          <td data-label="Tier"><strong>Edge / Mobile</strong></td>
+          <td data-label="Parameters">1B - 3B</td>
+          <td data-label="VRAM">2 - 4 GB</td>
+          <td data-label="Hardware">iGPU / Steam Deck / RPi / 8GB RAM</td>
+          <td data-label="Performance">Near-instant response</td>
         </tr>
         <tr data-tier="standard">
-          <td><strong>Standard</strong></td>
-          <td>7B - 9B</td>
-          <td>6 - 10 GB</td>
-          <td>RTX 3060 / 4060 / M1-M3 Mac</td>
-          <td>Snappy (30+ t/s)</td>
+          <td data-label="Tier"><strong>Standard</strong></td>
+          <td data-label="Parameters">7B - 9B</td>
+          <td data-label="VRAM">6 - 10 GB</td>
+          <td data-label="Hardware">RTX 3060 / 4060 / M1-M3 Mac</td>
+          <td data-label="Performance">Snappy (30+ t/s)</td>
         </tr>
         <tr data-tier="pro">
-          <td><strong>Pro / Coding</strong></td>
-          <td>12B - 14B</td>
-          <td>12 - 16 GB</td>
-          <td>RTX 4070 / 3080 / M-Pro</td>
-          <td>Thoughtful reasoning</td>
+          <td data-label="Tier"><strong>Pro / Coding</strong></td>
+          <td data-label="Parameters">12B - 14B</td>
+          <td data-label="VRAM">12 - 16 GB</td>
+          <td data-label="Hardware">RTX 4070 / 3080 / M-Pro</td>
+          <td data-label="Performance">Thoughtful reasoning</td>
         </tr>
         <tr data-tier="research">
-          <td><strong>Research</strong></td>
-          <td>30B - 35B</td>
-          <td>20 - 24 GB</td>
-          <td>RTX 3090 / 4090 / 5090 / M-Max</td>
-          <td>Deep analysis</td>
+          <td data-label="Tier"><strong>Research</strong></td>
+          <td data-label="Parameters">30B - 35B</td>
+          <td data-label="VRAM">20 - 24 GB</td>
+          <td data-label="Hardware">RTX 3090 / 4090 / 5090 / M-Max</td>
+          <td data-label="Performance">Deep analysis</td>
         </tr>
         <tr data-tier="sovereign">
-          <td><strong>Sovereign</strong></td>
-          <td>70B+</td>
-          <td>40 GB+</td>
-          <td>Dual 3090s / M-Ultra</td>
-          <td>Human-level complexity</td>
+          <td data-label="Tier"><strong>Sovereign</strong></td>
+          <td data-label="Parameters">70B+</td>
+          <td data-label="VRAM">40 GB+</td>
+          <td data-label="Hardware">Dual 3090s / M-Ultra</td>
+          <td data-label="Performance">Human-level complexity</td>
         </tr>
       </tbody>
     </table>
@@ -1037,11 +1063,11 @@
         <tr><th>Dependency</th><th>Version</th><th>Purpose</th></tr>
       </thead>
       <tbody>
-        <tr><td>Python</td><td>3.10+</td><td>Runtime</td></tr>
-        <tr><td>Tkinter</td><td>bundled</td><td>Desktop UI framework</td></tr>
-        <tr><td>Ollama</td><td>latest</td><td>Local LLM inference</td></tr>
-        <tr><td>Tailscale</td><td>optional</td><td>Mesh VPN for mobile/vehicle</td></tr>
-        <tr><td>Coqui XTTS v2</td><td>optional</td><td>Voice synthesis (requires GPU)</td></tr>
+        <tr><td data-label="Dependency">Python</td><td data-label="Version">3.10+</td><td data-label="Purpose">Runtime</td></tr>
+        <tr><td data-label="Dependency">Tkinter</td><td data-label="Version">bundled</td><td data-label="Purpose">Desktop UI framework</td></tr>
+        <tr><td data-label="Dependency">Ollama</td><td data-label="Version">latest</td><td data-label="Purpose">Local LLM inference</td></tr>
+        <tr><td data-label="Dependency">Tailscale</td><td data-label="Version">optional</td><td data-label="Purpose">Mesh VPN for mobile/vehicle</td></tr>
+        <tr><td data-label="Dependency">Coqui XTTS v2</td><td data-label="Version">optional</td><td data-label="Purpose">Voice synthesis (requires GPU)</td></tr>
       </tbody>
     </table>
   </div>
