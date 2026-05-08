@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Whim Ecosystem — 3D Architecture</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0e0e0e; overflow: hidden; font-family: 'Courier New', monospace; }
+  canvas { display: block; }
+  #controls {
+    position: fixed; bottom: 10px; left: 12px; z-index: 10;
+    color: #4a5a6a; font-size: 9px; line-height: 1.7;
+    pointer-events: none;
+  }
+  #tooltip {
+    position: fixed; display: none; z-index: 20;
+    background: #0d0d14ee; border: 1px solid #2fa572; border-radius: 6px;
+    padding: 10px 14px; color: #dce4ee; font-size: 11px; line-height: 1.5;
+    pointer-events: none; max-width: 280px;
+    box-shadow: 0 0 20px #2fa57244, 0 0 60px #0a0a0f;
+  }
+  #tooltip .tt-name { color: #2fa572; font-size: 13px; font-weight: bold; margin-bottom: 4px; }
+  #tooltip .tt-tier { color: #e8793a; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; }
+  #tooltip .tt-desc { color: #8a9aaa; margin-top: 4px; }
+  #fullscreen-btn {
+    position: fixed; top: 10px; right: 10px; z-index: 10;
+    background: #1a1a1acc; border: 1px solid #2a2a2a; border-radius: 4px;
+    color: #6a7a8a; font-family: 'Courier New', monospace; font-size: 10px;
+    padding: 4px 10px; cursor: pointer; transition: all 0.2s;
+  }
+  #fullscreen-btn:hover { border-color: #2fa572; color: #2fa572; }
+</style>
+</head>
+<body>
+<div id="controls">
+  DRAG orbit &nbsp;|&nbsp; SCROLL zoom &nbsp;|&nbsp; HOVER inspect &nbsp;|&nbsp; SPACE auto-rotate
+</div>
+<button id="fullscreen-btn" onclick="document.documentElement.requestFullscreen()">&#x26F6; FULLSCREEN</button>
+<div id="tooltip">
+  <div class="tt-tier"></div>
+  <div class="tt-name"></div>
+  <div class="tt-desc"></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+const TIERS = [
+  {
+    label: "OPERATOR CORE", y: 6, color: 0x2fa572, glowColor: "#2fa572",
+    nodes: [
+      { name: "Whim Terminal", desc: "Desktop command center / 20 tabs / Tkinter\nLLM routing / Voice / APRS / GeoF / IoT / GBrain", size: 1.8 },
+      { name: "OpenClaw", desc: "JSON-RPC WebSocket :18789\nAI agent protocol layer\nModel switching / context injection", size: 1.2 },
+      { name: "Ollama", desc: "DeepSeek R1:32B / Llama 3.1:8B / Qwen3\nLocal inference / zero cloud\nPort 11434", size: 1.2 },
+    ]
+  },
+  {
+    label: "CLIENT DEVICES", y: 1.5, color: 0xe8793a, glowColor: "#e8793a",
+    nodes: [
+      { name: "Whim.m", desc: "Android companion / 5-tab WebView\nRecorder / AI Chat / Wake / Devices / GeoF", size: 1.0 },
+      { name: "Whim.V", desc: "Vehicle dashboard / 13.6\" head unit\nLocal Qwen 1.5B / offline-capable\nFlask web app / 5 panels", size: 1.0 },
+      { name: "WISP", desc: "Resident AI agent\nSystem ops / diagnostics\nRemote via Whimgo.io + ttyd", size: 0.9 },
+    ]
+  },
+  {
+    label: "NETWORK LAYER", y: -1.5, color: 0x4a7aff, glowColor: "#4a7aff",
+    nodes: [
+      { name: "Tailscale", desc: "WireGuard mesh VPN\nAll devices connected\nWiFi-to-cellular handoff", size: 0.85 },
+      { name: "VPS Tunnel", desc: "Reverse SSH via autossh\nVultr 104.207.140.242\nNo home ports opened", size: 0.85 },
+      { name: "Signal", desc: "Messaging channel\nSignal-CLI bridge", size: 0.7 },
+      { name: "Discord", desc: "Bot + channel bridge\nRemote command relay", size: 0.7 },
+    ]
+  },
+  {
+    label: "SERVICES", y: -5, color: 0xe0a030, glowColor: "#e0a030",
+    nodes: [
+      { name: "GBrain", desc: "AI memory / PGLite + pgvector\nKnowledge graph / 34 skills\nDream Cycle / entity enrichment", size: 1.1, overrideColor: 0x2fa572 },
+      { name: "XTTS v2", desc: "Voice synthesis / Coqui / GPU\nMillyAl voice clone\nSpeaker references + spectrogram", size: 0.9 },
+      { name: "Journal Ingest", desc: "Flask :8088 / upload pipeline\nVoice memo > transcript > brain", size: 0.8 },
+      { name: "Himalaya", desc: "CLI email / IMAP + SMTP\n/email list, read, search", size: 0.75 },
+      { name: "SmartThings", desc: "IoT device control\nLights / sensors / automations", size: 0.7 },
+    ]
+  },
+  {
+    label: "FIELD / IoT", y: -8.5, color: 0xc4382a, glowColor: "#c4382a",
+    nodes: [
+      { name: "LoRa Bridge", desc: "ESP32 gateway\nGPS collar packets > GeoF\nLoRa 915MHz", size: 0.85 },
+      { name: "GeoF", desc: "Geofence tracker\nCanvas map / fence pins\n20-min heartbeat monitor", size: 0.9 },
+      { name: "Doppler", desc: "Weather radar / NWS NEXRAD\nOpen-Meteo / NWR audio\nSevere weather alerts", size: 0.85 },
+      { name: "HAM/APRS", desc: "Amateur radio monitor\nDirewolf integration\nOSM tile map + station markers", size: 0.85 },
+    ]
+  }
+];
+
+const CONNECTIONS = [
+  ["Whim Terminal", "OpenClaw"],
+  ["OpenClaw", "Ollama"],
+  ["Whim Terminal", "Ollama"],
+  ["Whim Terminal", "Whim.m"],
+  ["Whim Terminal", "Whim.V"],
+  ["Whim Terminal", "WISP"],
+  ["Whim Terminal", "Tailscale"],
+  ["Whim Terminal", "VPS Tunnel"],
+  ["Whim Terminal", "GBrain"],
+  ["Whim Terminal", "XTTS v2"],
+  ["Whim Terminal", "Journal Ingest"],
+  ["Whim Terminal", "Himalaya"],
+  ["Whim Terminal", "SmartThings"],
+  ["Whim Terminal", "GeoF"],
+  ["Whim Terminal", "Doppler"],
+  ["Whim Terminal", "HAM/APRS"],
+  ["Whim.m", "Tailscale"],
+  ["Whim.m", "VPS Tunnel"],
+  ["Whim.V", "Tailscale"],
+  ["WISP", "Tailscale"],
+  ["GeoF", "LoRa Bridge"],
+  ["OpenClaw", "Whim.m"],
+  ["OpenClaw", "Signal"],
+  ["OpenClaw", "Discord"],
+  ["GBrain", "Journal Ingest"],
+  ["Ollama", "WISP"],
+];
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0e0e0e, 0.018);
+
+const camera = new THREE.PerspectiveCamera(55, innerWidth / innerHeight, 0.1, 200);
+camera.position.set(12, 8, 18);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+document.body.appendChild(renderer.domElement);
+
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.0, 0.5, 0.3);
+composer.addPass(bloom);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.minDistance = 5;
+controls.maxDistance = 50;
+controls.target.set(0, -1, 0);
+controls.update();
+
+const gridGeo = new THREE.PlaneGeometry(80, 80, 80, 80);
+gridGeo.rotateX(-Math.PI / 2);
+const gridMat = new THREE.ShaderMaterial({
+  transparent: true,
+  uniforms: { time: { value: 0 } },
+  vertexShader: `
+    varying vec3 vPos;
+    void main() {
+      vPos = position;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    varying vec3 vPos;
+    uniform float time;
+    void main() {
+      float gx = abs(fract(vPos.x) - 0.5);
+      float gz = abs(fract(vPos.z) - 0.5);
+      float line = min(gx, gz);
+      float grid = 1.0 - smoothstep(0.0, 0.04, line);
+      float fade = 1.0 - smoothstep(0.0, 30.0, length(vPos.xz));
+      float pulse = 0.6 + 0.4 * sin(time * 0.5 + length(vPos.xz) * 0.15);
+      gl_FragColor = vec4(0.18, 0.65, 0.45, grid * fade * 0.15 * pulse);
+    }
+  `
+});
+const grid = new THREE.Mesh(gridGeo, gridMat);
+grid.position.y = -12;
+scene.add(grid);
+
+const pCount = 600;
+const pGeo = new THREE.BufferGeometry();
+const pPos = new Float32Array(pCount * 3);
+const pAlpha = new Float32Array(pCount);
+for (let i = 0; i < pCount; i++) {
+  pPos[i*3] = (Math.random() - 0.5) * 40;
+  pPos[i*3+1] = (Math.random() - 0.5) * 30 - 2;
+  pPos[i*3+2] = (Math.random() - 0.5) * 40;
+  pAlpha[i] = Math.random();
+}
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+pGeo.setAttribute('alpha', new THREE.BufferAttribute(pAlpha, 1));
+const pMat = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false,
+  uniforms: { time: { value: 0 } },
+  vertexShader: `
+    attribute float alpha;
+    varying float vAlpha;
+    void main() {
+      vAlpha = alpha;
+      vec4 mv = modelViewMatrix * vec4(position, 1.0);
+      gl_PointSize = (2.0 + alpha * 2.0) * (300.0 / -mv.z);
+      gl_Position = projectionMatrix * mv;
+    }
+  `,
+  fragmentShader: `
+    varying float vAlpha;
+    uniform float time;
+    void main() {
+      float d = length(gl_PointCoord - 0.5);
+      if (d > 0.5) discard;
+      float a = (1.0 - d * 2.0) * 0.25 * (0.5 + 0.5 * sin(time + vAlpha * 6.28));
+      gl_FragColor = vec4(0.18, 0.96, 0.78, a * vAlpha);
+    }
+  `
+});
+scene.add(new THREE.Points(pGeo, pMat));
+
+const nodeMap = {};
+const nodeMeshes = [];
+
+function makeLabel(text, fontSize, color) {
+  const canvas = document.createElement('canvas');
+  const sz = fontSize * 12;
+  canvas.width = 512; canvas.height = 64;
+  const ctx = canvas.getContext('2d');
+  ctx.font = `bold ${sz}px "Courier New", monospace`;
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = color;
+  ctx.shadowBlur = sz * 0.6;
+  ctx.fillText(text, 256, 32);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.minFilter = THREE.LinearFilter;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(fontSize * 2.2, fontSize * 0.28, 1);
+  return sprite;
+}
+
+function makeNode(name, desc, tier, nodeIdx, totalInTier, size) {
+  const color = new THREE.Color(tier.nodes[nodeIdx].overrideColor || tier.color);
+  const spread = Math.max(totalInTier * 3.5, 6);
+  const x = (nodeIdx - (totalInTier - 1) / 2) * (spread / totalInTier);
+  const y = tier.y;
+  const z = (Math.random() - 0.5) * 1.5;
+
+  const geo = new THREE.BoxGeometry(size, size * 0.6, size * 0.6);
+  const edges = new THREE.EdgesGeometry(geo);
+  const lineMat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.7 });
+  const wireframe = new THREE.LineSegments(edges, lineMat);
+  wireframe.position.set(x, y, z);
+  scene.add(wireframe);
+
+  const innerGeo = new THREE.BoxGeometry(size * 0.92, size * 0.52, size * 0.52);
+  const innerMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
+  const inner = new THREE.Mesh(innerGeo, innerMat);
+  inner.position.copy(wireframe.position);
+  scene.add(inner);
+
+  const cSize = size * 0.08;
+  const cGeo = new THREE.SphereGeometry(cSize, 8, 8);
+  const cMat = new THREE.MeshBasicMaterial({ color });
+  [[-1,-1,-1],[-1,-1,1],[-1,1,-1],[-1,1,1],[1,-1,-1],[1,-1,1],[1,1,-1],[1,1,1]].forEach(([ox,oy,oz]) => {
+    const c = new THREE.Mesh(cGeo, cMat);
+    c.position.set(x + ox*size*0.5, y + oy*size*0.3, z + oz*size*0.3);
+    scene.add(c);
+  });
+
+  const label = makeLabel(name, size * 0.55, tier.glowColor);
+  label.position.set(x, y + size * 0.55, z);
+  scene.add(label);
+
+  const hitGeo = new THREE.BoxGeometry(size * 1.2, size * 0.8, size * 0.8);
+  const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+  const hitbox = new THREE.Mesh(hitGeo, hitMat);
+  hitbox.position.copy(wireframe.position);
+  hitbox.userData = { name, desc, tier: tier.label, color: tier.glowColor, wireframe, inner, lineMat, innerMat };
+  scene.add(hitbox);
+  nodeMeshes.push(hitbox);
+  nodeMap[name] = wireframe.position.clone();
+}
+
+TIERS.forEach(tier => {
+  const tl = makeLabel(tier.label, 0.7, tier.glowColor + "88");
+  tl.position.set(-12, tier.y, 0);
+  scene.add(tl);
+  tier.nodes.forEach((node, ni) => {
+    makeNode(node.name, node.desc, tier, ni, tier.nodes.length, node.size);
+  });
+});
+
+const flowLines = [];
+CONNECTIONS.forEach(([from, to]) => {
+  const a = nodeMap[from], b = nodeMap[to];
+  if (!a || !b) return;
+  const mid = new THREE.Vector3().addVectors(a, b).multiplyScalar(0.5);
+  mid.y += 0.5 + Math.abs(a.y - b.y) * 0.15;
+  mid.x += (Math.random() - 0.5) * 0.5;
+  const curve = new THREE.QuadraticBezierCurve3(a, mid, b);
+  const points = curve.getPoints(30);
+  const geo = new THREE.BufferGeometry().setFromPoints(points);
+  const fromTier = TIERS.find(t => t.nodes.some(n => n.name === from));
+  const lineColor = fromTier ? fromTier.color : 0x2fa572;
+  const mat = new THREE.LineBasicMaterial({ color: lineColor, transparent: true, opacity: 0.12 });
+  scene.add(new THREE.Line(geo, mat));
+  const dotGeo = new THREE.SphereGeometry(0.04, 6, 6);
+  const dot = new THREE.Mesh(dotGeo, new THREE.MeshBasicMaterial({ color: lineColor }));
+  scene.add(dot);
+  flowLines.push({ curve, dot, mat, from, to });
+});
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2(-999, -999);
+const tooltip = document.getElementById('tooltip');
+let hoveredNode = null;
+let autoRotate = true;
+
+window.addEventListener('mousemove', e => {
+  mouse.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(nodeMeshes);
+  if (hoveredNode) {
+    hoveredNode.userData.lineMat.opacity = 0.7;
+    hoveredNode.userData.innerMat.opacity = 0.08;
+    hoveredNode = null;
+  }
+  if (hits.length > 0) {
+    const h = hits[0].object;
+    hoveredNode = h;
+    h.userData.lineMat.opacity = 1.0;
+    h.userData.innerMat.opacity = 0.2;
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 16) + 'px';
+    tooltip.style.top = (e.clientY - 10) + 'px';
+    tooltip.style.borderColor = h.userData.color;
+    tooltip.querySelector('.tt-tier').textContent = h.userData.tier;
+    tooltip.querySelector('.tt-tier').style.color = h.userData.color;
+    tooltip.querySelector('.tt-name').textContent = h.userData.name;
+    tooltip.querySelector('.tt-name').style.color = h.userData.color;
+    tooltip.querySelector('.tt-desc').textContent = h.userData.desc;
+    document.body.style.cursor = 'pointer';
+    flowLines.forEach(fl => {
+      fl.mat.opacity = (fl.from === h.userData.name || fl.to === h.userData.name) ? 0.6 : 0.05;
+    });
+  } else {
+    tooltip.style.display = 'none';
+    document.body.style.cursor = 'default';
+    flowLines.forEach(fl => { fl.mat.opacity = 0.12; });
+  }
+});
+
+window.addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); autoRotate = !autoRotate; }
+});
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+});
+
+// pause when not visible (perf for embedded iframe)
+let visible = true;
+document.addEventListener('visibilitychange', () => { visible = !document.hidden; });
+
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  if (!visible) return;
+  const t = clock.getElapsedTime();
+  gridMat.uniforms.time.value = t;
+  pMat.uniforms.time.value = t;
+  if (autoRotate) {
+    const angle = t * 0.08;
+    camera.position.x = Math.cos(angle) * 22;
+    camera.position.z = Math.sin(angle) * 22;
+    camera.position.y = 5 + Math.sin(t * 0.15) * 3;
+    controls.target.set(0, -1, 0);
+  }
+  controls.update();
+  flowLines.forEach((fl, i) => {
+    const p = fl.curve.getPoint((t * 0.3 + i * 0.17) % 1.0);
+    fl.dot.position.copy(p);
+  });
+  nodeMeshes.forEach(m => {
+    const w = m.userData.wireframe;
+    w.rotation.y = t * 0.15 + w.position.x * 0.1;
+    const bob = Math.sin(t * 0.8 + w.position.x + w.position.z) * 0.05;
+    m.userData.inner.position.y = w.position.y + bob;
+    m.position.y = w.position.y + bob;
+  });
+  composer.render();
+}
+animate();
+</script>
+</body>
+</html>
